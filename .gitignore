@@ -1,0 +1,8 @@
+# Directories
+.venv
+.vscode
+build
+
+
+# files
+CMakeUserPresets.json
