@@ -17,10 +17,11 @@ enable_testing()
 add_executable(chip8_tests 
     tests/test_memory.cpp
     tests/test_keyboard.cpp
+    tests/test_sdl_input.cpp
 )
 
 target_include_directories(chip8_tests PRIVATE include)
-target_link_libraries(chip8_tests PRIVATE GTest::gtest_main)
+target_link_libraries(chip8_tests PRIVATE GTest::gtest_main SDL2::SDL2)
 
 include(GoogleTest)
 gtest_discover_tests(chip8_tests)

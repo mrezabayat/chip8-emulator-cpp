@@ -36,6 +36,8 @@ cmake --build --preset conan-release
 The CHIP-8 keypad maps to hex digits (0x0–0xF). A typical layout:
 
 ```text
+ chip8           PC
+-------        -------
 1 2 3 C        1 2 3 4
 4 5 6 D  --->  Q W E R
 7 8 9 E        A S D F

@@ -8,7 +8,7 @@ namespace chip8 {
 
 class Memory {
 public:
-  constexpr Memory() noexcept : data_{} {};
+  constexpr explicit Memory() noexcept : data_{} {};
 
   constexpr void write_byte(uint16_t addr, uint8_t val) {
     check_bounds(addr);

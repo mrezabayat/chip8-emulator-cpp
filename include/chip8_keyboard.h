@@ -8,7 +8,7 @@ namespace chip8 {
 
 class Keyboard {
 public:
-  constexpr Keyboard() noexcept : keys_{} {}
+  constexpr explicit Keyboard() noexcept : keys_{} {}
 
   constexpr void set_key_state(uint8_t key, bool pressed) {
     check_key_bounds(key);

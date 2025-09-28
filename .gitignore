@@ -1,9 +1,7 @@
 # Directories
 .venv
 .vscode
-build
-Testing
-
+build*
 
 # files
 CMakeUserPresets.json
