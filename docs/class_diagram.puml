@@ -1,142 +1,145 @@
 @startuml
-title Core and SDL class relationships (Simplified — no bus)
+title CHIP-8 Emulator — Core vs Frontend
 
-class Memory {
-  - data_[4096] : uint8_t
-  + reset()
-  + load_rom(span<uint8_t>)
-  + load_rom_file(path)
-  + read_byte(addr) : uint8_t
-  + write_byte(addr, value)
-  + font() : span<const uint8_t>
+package "Core (SDL-agnostic)" {
+  class Memory {
+    - data_[4096] : uint8_t
+    + reset()
+    + load_rom(span<uint8_t>)
+    + load_rom_file(path)
+    + read_byte(addr) : uint8_t
+    + write_byte(addr, value)
+    + font() : span<const uint8_t>
+  }
+
+  class Display {
+    + FrameBuffer : array<uint8_t>
+    - buffer_
+    - wrap_ : bool
+    - dirty_ : bool
+    + draw_sprite(x, y, sprite) : bool
+    + clear()
+    + reset_dirty()
+    + dirty() : bool
+  }
+
+  class Keypad {
+    - keys_[16] : bool
+    - last_pressed_ : optional<uint8_t>
+    + set_key_state(key, pressed)
+    + is_pressed(key) : bool
+    + last_pressed() : optional<uint8_t>
+  }
+
+  class Timers {
+    - delay_ : uint8_t
+    - sound_ : uint8_t
+    + tick_60hz()
+    + set_delay(value)
+    + set_sound(value)
+    + beep() : bool
+  }
+
+  class RandomGenerator <<interface>> {
+    + next(mask) : uint8_t
+  }
+
+  class PcgRandom {
+    - engine_ : mt19937_64
+    + next(mask) : uint8_t
+    + reseed(seed)
+  }
+  RandomGenerator <|.. PcgRandom
+
+  class Cpu {
+    - memory_ : Memory&
+    - display_ : Display&
+    - keypad_ : Keypad&
+    - timers_ : Timers&
+    - rng_ : RandomGenerator&
+    - v_[16] : uint8_t
+    - stack_[16] : uint16_t
+    - i_ : uint16_t
+    - pc_ : uint16_t
+    - sp_ : uint8_t
+    - config_ : CpuConfig
+    + step() : StepResult
+    + set_config(config)
+    + set_trace_callback(cb)
+    + registers() : const array<uint8_t,16>&
+    + pc() : uint16_t
+    + i() : uint16_t
+  }
+
+  class Emulator {
+    - memory_ : Memory
+    - display_ : Display
+    - keypad_ : Keypad
+    - timers_ : Timers
+    - rng_ : PcgRandom
+    - cpu_ : Cpu
+    - state_ : EmulatorState
+    - cycles_per_frame_ : uint32_t
+    + start()
+    + pause()
+    + stop()
+    + reset()
+    + set_cycles_per_frame(value)
+    + run_frame([cycles]) : RunFrameResult
+    + tick_timers(ticks)
+  }
+
+  ' CPU directly uses core subsystems:
+  Cpu --> Memory
+  Cpu --> Display
+  Cpu --> Keypad
+  Cpu --> Timers
+  Cpu --> RandomGenerator
+
+  ' Emulator owns the subsystems and CPU:
+  Emulator *-- Memory
+  Emulator *-- Display
+  Emulator *-- Keypad
+  Emulator *-- Timers
+  Emulator *-- PcgRandom
+  Emulator *-- Cpu
 }
 
-class Display {
-  + FrameBuffer : array<uint8_t>
-  - buffer_
-  - wrap_ : bool
-  - dirty_ : bool
-  + draw_sprite(x, y, sprite) : bool
-  + clear()
-  + reset_dirty()
-  + dirty() : bool
+package "Frontend (SDL glue)" {
+  class SdlDisplay {
+    - window_ : SDL_Window*
+    - renderer_ : SDL_Renderer*
+    - texture_ : SDL_Texture*
+    - pixel_buffer_ : vector<uint32_t>
+    + render(display, show_osd, text)
+    + set_scale(scale)
+    + set_vsync(on)
+  }
+
+  class SdlInput {
+    - keypad_ : Keypad&
+    - keymap_ : unordered_map<SDL_Scancode, uint8_t>
+    + handle_event(event)
+    + set_keymap(map)
+  }
+
+  class SdlAudio {
+    - device_ : SDL_AudioDeviceID
+    - enabled_ : atomic<bool>
+    - playing_ : atomic<bool>
+    + update(beep_active)
+    + set_enabled(value)
+  }
+
+  ' Frontend integrates with Core
+  SdlDisplay --> Display
+  SdlInput --> Keypad
+  SdlAudio --> Timers
 }
-
-class Keypad {
-  - keys_[16] : bool
-  - last_pressed_ : optional<uint8_t>
-  + set_key_state(key, pressed)
-  + is_pressed(key) : bool
-  + last_pressed() : optional<uint8_t>
-}
-
-class Timers {
-  - delay_ : uint8_t
-  - sound_ : uint8_t
-  + tick_60hz()
-  + set_delay(value)
-  + set_sound(value)
-  + beep() : bool
-}
-
-class RandomGenerator <<interface>> {
-  + next(mask) : uint8_t
-}
-
-class PcgRandom {
-  - engine_ : mt19937_64
-  + next(mask) : uint8_t
-  + reseed(seed)
-}
-RandomGenerator <|.. PcgRandom
-
-class Cpu {
-  - memory_ : Memory&
-  - display_ : Display&
-  - keypad_ : Keypad&
-  - timers_ : Timers&
-  - rng_ : RandomGenerator&
-  - v_[16] : uint8_t
-  - stack_[16] : uint16_t
-  - i_ : uint16_t
-  - pc_ : uint16_t
-  - sp_ : uint8_t
-  - config_ : CpuConfig
-  + step() : StepResult
-  + set_config(config)
-  + set_trace_callback(cb)
-  + registers() : const array<uint8_t,16>&
-  + pc() : uint16_t
-  + i() : uint16_t
-}
-
-class Emulator {
-  - memory_ : Memory
-  - display_ : Display
-  - keypad_ : Keypad
-  - timers_ : Timers
-  - rng_ : PcgRandom
-  - cpu_ : Cpu
-  - state_ : EmulatorState
-  - cycles_per_frame_ : uint32_t
-  + start()
-  + pause()
-  + stop()
-  + reset()
-  + set_cycles_per_frame(value)
-  + run_frame([cycles]) : RunFrameResult
-  + tick_timers(ticks)
-}
-
-' CPU directly uses core subsystems:
-Cpu --> Memory
-Cpu --> Display
-Cpu --> Keypad
-Cpu --> Timers
-Cpu --> RandomGenerator
-
-' Emulator owns the subsystems and CPU:
-Emulator *-- Memory
-Emulator *-- Display
-Emulator *-- Keypad
-Emulator *-- Timers
-Emulator *-- PcgRandom
-Emulator *-- Cpu
-
-class SdlDisplay {
-  - window_ : SDL_Window*
-  - renderer_ : SDL_Renderer*
-  - texture_ : SDL_Texture*
-  - pixel_buffer_ : vector<uint32_t>
-  + render(display, show_osd, text)
-  + set_scale(scale)
-  + set_vsync(on)
-}
-
-class SdlInput {
-  - keypad_ : Keypad&
-  - keymap_ : unordered_map<SDL_Scancode, uint8_t>
-  + handle_event(event)
-  + set_keymap(map)
-}
-
-class SdlAudio {
-  - device_ : SDL_AudioDeviceID
-  - enabled_ : atomic<bool>
-  - playing_ : atomic<bool>
-  + update(beep_active)
-  + set_enabled(value)
-}
-
-SdlDisplay --> Display
-SdlInput --> Keypad
-SdlAudio --> Timers
 
 note right of Emulator
-Emulator orchestrates:
-- frames and cycles (calls Cpu::step())
-- 60Hz timers (tick_60hz)
-- setup/reset/ROM load
-CPU executes instructions and manipulates Memory/Display/Timers directly.
+Core = pure emulator logic (portable, testable, SDL-free).
+Frontend = SDL glue code that adapts OS input/output
+to core subsystems.
 end note
 @enduml

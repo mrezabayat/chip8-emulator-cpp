@@ -14,7 +14,11 @@ target_include_directories(chip8 PRIVATE include)
 # --- Unit tests ---
 enable_testing()
 
-add_executable(chip8_tests tests/test_memory.cpp)
+add_executable(chip8_tests 
+    tests/test_memory.cpp
+    tests/test_keyboard.cpp
+)
+
 target_include_directories(chip8_tests PRIVATE include)
 target_link_libraries(chip8_tests PRIVATE GTest::gtest_main)
 
