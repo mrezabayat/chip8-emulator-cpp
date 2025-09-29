@@ -5,7 +5,7 @@ namespace chip8 {
 
 class Timer {
 public:
-  constexpr Timer() noexcept {}
+  constexpr explicit Timer() noexcept {}
 
   constexpr void set_delay(uint8_t delay) { delay_ = delay; }
   constexpr void set_sound(uint8_t sound) { sound_ = sound; }
