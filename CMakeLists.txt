@@ -18,6 +18,7 @@ add_executable(chip8_tests
     tests/test_memory.cpp
     tests/test_keyboard.cpp
     tests/test_sdl_input.cpp
+    tests/test_timer.cpp
 )
 
 target_include_directories(chip8_tests PRIVATE include)
