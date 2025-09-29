@@ -1,0 +1,51 @@
+#include "chip8_display.h"
+#include "gtest/gtest.h"
+
+TEST(DisplayTest, ScreenStartsCleared) {
+  chip8::Display d;
+  for (int y = 0; y < chip8::HEIGHT; y++) {
+    for (int x = 0; x < chip8::WIDTH; x++) {
+      EXPECT_FALSE(d.is_pixel_set(x, y));
+    }
+  }
+}
+
+TEST(DisplayTest, CanSetAndCheckPixel) {
+  chip8::Display d;
+  d.set_pixel(2, 3, true);
+  EXPECT_TRUE(d.is_pixel_set(2, 3));
+}
+
+TEST(DisplayTest, SetPixelWrapsAround) {
+  chip8::Display d;
+  d.set_pixel(chip8::WIDTH + 1, chip8::HEIGHT + 2, true);
+  EXPECT_TRUE(d.is_pixel_set(1, 2)); // wrapped coordinates
+}
+
+TEST(DisplayTest, ClearResetsAllPixels) {
+  chip8::Display d;
+  d.set_pixel(5, 5, true);
+  d.clear();
+  EXPECT_FALSE(d.is_pixel_set(5, 5));
+}
+
+TEST(DisplayTest, DrawSpriteWithoutCollision) {
+  chip8::Display d;
+  uint8_t sprite[2] = {0b11110000, 0b00001111};
+  bool collision = d.draw_sprite(0, 0, sprite, 2);
+
+  EXPECT_FALSE(collision);
+  EXPECT_TRUE(d.is_pixel_set(0, 0));
+  EXPECT_TRUE(d.is_pixel_set(7, 1));
+}
+
+TEST(DisplayTest, DrawSpriteWithCollision) {
+  chip8::Display d;
+  uint8_t sprite[1] = {0b11110000};
+
+  d.draw_sprite(0, 0, sprite, 1);                  // first time
+  bool collision = d.draw_sprite(0, 0, sprite, 1); // second time → XOR clears
+
+  EXPECT_TRUE(collision);
+  EXPECT_FALSE(d.is_pixel_set(0, 0)); // flipped off
+}
