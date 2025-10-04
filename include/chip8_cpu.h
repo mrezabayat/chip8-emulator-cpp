@@ -8,13 +8,14 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <span>
 
 namespace chip8 {
 
 class Cpu {
 public:
-  explicit Cpu(Memory &memory, Display &display, Keyboard &keyboard,
-               Timer &timer, PcgRandom &rng) noexcept
+  explicit constexpr Cpu(Memory &memory, Display &display, Keyboard &keyboard,
+                         Timer &timer, PcgRandom &rng) noexcept
       : memory_(memory), display_(display), keyboard_(keyboard), timer_(timer),
         rng_(rng) {
     reset();
@@ -22,16 +23,25 @@ public:
 
   void execute();
 
-private:
-  void reset() noexcept {
-    stack_.fill(0);
-    v_.fill(0);
-    I_ = 0;
-    sp_ = 0;
-    pc_ = START_ADDRESS;
+  [[nodiscard]] constexpr uint16_t program_counter() const noexcept {
+    return pc_;
+  }
+  [[nodiscard]] constexpr std::span<const uint8_t, NUM_CPU_REGISTERS>
+  registers() const noexcept {
+    return v_;
+  }
+  [[nodiscard]] constexpr uint16_t index_register() const noexcept {
+    return I_;
   }
 
-  void execute_0(uint16_t opcode);
+private:
+  void reset() noexcept;
+
+  void execute_0(uint16_t opcode) noexcept;
+  void execute_1(uint16_t opcode) noexcept;
+  void execute_2(uint16_t opcode) noexcept;
+  void execute_3(uint16_t opcode) noexcept;
+  void execute_6(uint16_t opcode) noexcept;
 
   std::reference_wrapper<Memory> memory_;
   std::reference_wrapper<Display> display_;
