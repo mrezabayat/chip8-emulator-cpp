@@ -3,8 +3,8 @@
 
 TEST(DisplayTest, ScreenStartsCleared) {
   chip8::Display d;
-  for (int y = 0; y < chip8::HEIGHT; y++) {
-    for (int x = 0; x < chip8::WIDTH; x++) {
+  for (int y = 0; y < chip8::SCREEN_HEIGHT; y++) {
+    for (int x = 0; x < chip8::SCREEN_WIDTH; x++) {
       EXPECT_FALSE(d.is_pixel_set(x, y));
     }
   }
@@ -18,7 +18,7 @@ TEST(DisplayTest, CanSetAndCheckPixel) {
 
 TEST(DisplayTest, SetPixelWrapsAround) {
   chip8::Display d;
-  d.set_pixel(chip8::WIDTH + 1, chip8::HEIGHT + 2, true);
+  d.set_pixel(chip8::SCREEN_WIDTH + 1, chip8::SCREEN_HEIGHT + 2, true);
   EXPECT_TRUE(d.is_pixel_set(1, 2)); // wrapped coordinates
 }
 

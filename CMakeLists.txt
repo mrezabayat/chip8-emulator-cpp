@@ -7,9 +7,17 @@ set(CXX_STANDARD_REQUIRED ON)
 find_package(SDL2 REQUIRED)
 find_package(GTEST REQUIRED)
 
+# --- CHIP8 Core lib ---
+add_library(chip8_core STATIC 
+    src/chip8_cpu.cpp
+)
+target_include_directories(chip8_core PUBLIC include)
+
 # --- Main executable ---
-add_executable(chip8 src/main.cpp)
-target_include_directories(chip8 PRIVATE include)
+add_executable(chip8 
+    src/main.cpp
+)
+target_link_libraries(chip8 PRIVATE chip8_core)
 
 # --- Unit tests ---
 enable_testing()
@@ -21,10 +29,9 @@ add_executable(chip8_tests
     tests/test_timer.cpp
     tests/test_pcg_random.cpp
     tests/test_display.cpp
+    tests/test_cpu.cpp
 )
-
-target_include_directories(chip8_tests PRIVATE include)
-target_link_libraries(chip8_tests PRIVATE GTest::gtest_main SDL2::SDL2)
+target_link_libraries(chip8_tests PRIVATE chip8_core GTest::gtest_main SDL2::SDL2)
 
 include(GoogleTest)
 gtest_discover_tests(chip8_tests)

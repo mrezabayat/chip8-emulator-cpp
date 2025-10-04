@@ -16,13 +16,13 @@ public:
   // Set or reset pixel at (x,y)
   constexpr void set_pixel(int x, int y, bool on) noexcept {
     auto [nx, ny] = wrap(x, y);
-    buffer_[ny * WIDTH + nx] = on ? 1 : 0;
+    buffer_[ny * SCREEN_WIDTH + nx] = on ? 1 : 0;
   }
 
   // Query pixel state
   [[nodiscard]] constexpr bool is_pixel_set(int x, int y) const noexcept {
     auto [nx, ny] = wrap(x, y);
-    return buffer_[ny * WIDTH + nx] != 0;
+    return buffer_[ny * SCREEN_WIDTH + nx] != 0;
   }
 
   // Draw sprite at (x,y), returns true if collision occurred
@@ -33,7 +33,7 @@ public:
       for (int bit = 0; bit < 8; ++bit) {
         if (line & (0b10000000 >> bit)) {
           auto [nx, ny] = wrap(x + bit, y + row);
-          auto &pixel = buffer_[ny * WIDTH + nx];
+          auto &pixel = buffer_[ny * SCREEN_WIDTH + nx];
           if (pixel == 1) {
             collision = true;
           }
@@ -48,10 +48,10 @@ private:
   // Wrap coordinates (Chip-8 wraps around screen edges)
   [[nodiscard]] static constexpr std::pair<int, int> wrap(int x,
                                                           int y) noexcept {
-    return {x % WIDTH, y % HEIGHT};
+    return {x % SCREEN_WIDTH, y % SCREEN_HEIGHT};
   }
 
-  std::array<uint8_t, WIDTH * HEIGHT> buffer_;
+  std::array<uint8_t, SCREEN_WIDTH * SCREEN_HEIGHT> buffer_;
 };
 
 } // namespace chip8
