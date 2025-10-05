@@ -90,3 +90,55 @@ TEST_F(CpuTest, SESkipsNextInstructionIfVxIsKK) {
   cpu.execute();
   EXPECT_EQ(cpu.program_counter(), 0x206);
 }
+
+TEST_F(CpuTest, SNE_VxByte_SkipsNextInstructionWhenNotEqual) {
+  // Arrange: set v[0x09] = 0x56
+  memory.write_byte(0x200, 0x69u);
+  memory.write_byte(0x201, 0x56u);
+  cpu.execute();
+
+  // Next instruction
+  memory.write_byte(0x202, 0x49u);
+  memory.write_byte(0x203, 0x50u);
+  uint16_t before = cpu.program_counter();
+  cpu.execute(); // should skip
+
+  EXPECT_EQ(cpu.program_counter(), before + 4);
+}
+
+TEST_F(CpuTest, SE_VxVy_SkipsNextInstructionWhenEqual) {
+  // Arrange: set v[0x03] = v[0x0A] = 0x85
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x85u);
+  cpu.execute();
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x85u);
+  cpu.execute();
+
+  // Act
+  memory.write_byte(0x204, 0x53u);
+  memory.write_byte(0x205, 0xA0u);
+  uint16_t before = cpu.program_counter();
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), before + 4);
+}
+
+TEST_F(CpuTest, ADD_VxByte_AddsImmediateToRegister) {
+  // Arrange: set v[0x03] = 0x23
+  uint8_t first = 0x23;
+  uint8_t second = 0x45;
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, first);
+  cpu.execute();
+
+  // Act: add 0x45 to v[0x03]
+  memory.write_byte(0x202, 0x73);
+  memory.write_byte(0x203, second);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], first + second);
+}
