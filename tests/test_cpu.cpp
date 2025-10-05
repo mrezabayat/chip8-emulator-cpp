@@ -297,3 +297,37 @@ TEST_F(CpuTest, SUB_VxVy_WhenVxIsLessThanVy) {
   EXPECT_EQ(cpu.registers()[0x03], 0xE4u);
   EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
 }
+
+TEST_F(CpuTest, SHR_Vx_DivdeVxBy2WhenItIsEven) {
+  // Arrange: set v[0x03] = 0x64
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x64u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x64u);
+
+  // Act
+  memory.write_byte(0x202, 0x83u);
+  memory.write_byte(0x203, 0x06u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0x32u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
+}
+
+TEST_F(CpuTest, SHR_Vx_DivdeVxBy2WhenItIsOdd) {
+  // Arrange: set v[0x03] = 0x63
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x63u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x63u);
+
+  // Act
+  memory.write_byte(0x202, 0x83u);
+  memory.write_byte(0x203, 0x06u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0x31u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+}
