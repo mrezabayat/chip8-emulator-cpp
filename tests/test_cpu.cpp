@@ -201,3 +201,24 @@ TEST_F(CpuTest, AND_VxVy_BitwiseAndfOfVxAndVyIsStoredInVx) {
   // Assert
   EXPECT_EQ(cpu.registers()[0x03], 0x01u);
 }
+
+TEST_F(CpuTest, XOR_VxVy_BitwiseXorfOfVxAndVyIsStoredInVx) {
+  // Arrange: set v[0x03] = 0x23 and v[A] = 0x45
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x23u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x23u);
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x45u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0A], 0x45u);
+
+  // Act: bitwise xor operation
+  memory.write_byte(0x204, 0x83u);
+  memory.write_byte(0x205, 0xA3u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0x66u);
+}
