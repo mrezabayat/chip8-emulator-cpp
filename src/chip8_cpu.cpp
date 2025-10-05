@@ -53,11 +53,10 @@ void Cpu::execute_0(uint16_t opcode) noexcept {
   case 0x00E0:
     display_.get().clear();
     break;
-
-  case 0x00EE: {
+  case 0x00EE:
     --sp_;
     pc_ = stack_[sp_];
-  } break;
+    break;
   default:
     std::print(std::cerr, "[Warning] 0nnn - SYS addr is ignored.\n");
     break;
@@ -113,6 +112,7 @@ void Cpu::execute_8(uint16_t opcode) noexcept {
   uint8_t x = (opcode >> 8) & 0x0F;
   uint8_t y = (opcode & 0x00F0) >> 4;
   uint8_t n = opcode & 0x000F;
+  uint16_t temp{};
 
   switch (n) {
   case 0x00:
@@ -126,6 +126,11 @@ void Cpu::execute_8(uint16_t opcode) noexcept {
     break;
   case 0x03:
     v_[x] ^= v_[y];
+    break;
+  case 0x04:
+    temp = v_[x] + v_[y];
+    v_[0x0F] = temp > 0xFFu;
+    v_[x] = temp;
     break;
   default:
     break;

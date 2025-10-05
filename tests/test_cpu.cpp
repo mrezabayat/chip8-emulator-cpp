@@ -222,3 +222,34 @@ TEST_F(CpuTest, XOR_VxVy_BitwiseXorfOfVxAndVyIsStoredInVx) {
   // Assert
   EXPECT_EQ(cpu.registers()[0x03], 0x66u);
 }
+
+TEST_F(CpuTest, ADD_VxVy_AddTwoRegistersAndStoreCarryInVf) {
+  // Arrange: set v[0x03] = 0x80 and v[A] = 0x64
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x80u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x80u);
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x64u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0A], 0x64u);
+
+  // Act: v[0x03] += v[0x0A]
+  memory.write_byte(0x204, 0x83u);
+  memory.write_byte(0x205, 0xA4u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0xE4u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
+
+  // Act one more time to check the carry
+  memory.write_byte(0x206, 0x83u);
+  memory.write_byte(0x207, 0xA4u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0x48u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+}
