@@ -253,3 +253,47 @@ TEST_F(CpuTest, ADD_VxVy_AddTwoRegistersAndStoreCarryInVf) {
   EXPECT_EQ(cpu.registers()[0x03], 0x48u);
   EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
 }
+
+TEST_F(CpuTest, SUB_VxVy_WhenVxIsGreaterThanVy) {
+  // Arrange: set v[0x03] = 0x80 and v[A] = 0x64
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x80u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x80u);
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x64u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0A], 0x64u);
+
+  // Act: v[0x03] -= v[A]
+  memory.write_byte(0x204, 0x83u);
+  memory.write_byte(0x205, 0xA5u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0x1Cu);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
+}
+
+TEST_F(CpuTest, SUB_VxVy_WhenVxIsLessThanVy) {
+  // Arrange: set v[0x03] = 0x64 and v[A] = 0x80
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x64u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x64u);
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x80u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0A], 0x80u);
+
+  // Act: v[0x03] -= v[A]
+  memory.write_byte(0x204, 0x83u);
+  memory.write_byte(0x205, 0xA5u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0xE4u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+}
