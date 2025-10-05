@@ -32,6 +32,9 @@ void Cpu::execute() {
   case 0x7000:
     execute_7(opcode);
     break;
+  case 0x8000:
+    execute_8(opcode);
+    break;
   default:
     break;
   }
@@ -104,6 +107,21 @@ void Cpu::execute_7(uint16_t opcode) noexcept {
   uint8_t x = (opcode >> 8) & 0x0F;
   uint8_t kk = opcode & 0x00FF;
   v_[x] += kk;
+}
+
+void Cpu::execute_8(uint16_t opcode) noexcept {
+  uint8_t x = (opcode >> 8) & 0x0F;
+  uint8_t y = (opcode & 0x00F0) >> 4;
+  uint8_t n = opcode & 0x000F;
+
+  switch (n) {
+  case 0x00:
+    v_[x] = v_[y];
+    break;
+
+  default:
+    break;
+  }
 }
 
 } // namespace chip8

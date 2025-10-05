@@ -142,3 +142,20 @@ TEST_F(CpuTest, ADD_VxByte_AddsImmediateToRegister) {
   // Assert
   EXPECT_EQ(cpu.registers()[0x03], first + second);
 }
+
+TEST_F(CpuTest, LD_VxVy_StoresValueOfVyInVx) {
+  // Arrange: set v[0x03] = 0x85
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x85u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x85u);
+
+  // Act: LD v[0x0E] v[0x03]
+  memory.write_byte(0x202, 0x8Eu);
+  memory.write_byte(0x203, 0x30u);
+  EXPECT_EQ(cpu.registers()[0x0E], 0x00u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x0E], 0x85u);
+}
