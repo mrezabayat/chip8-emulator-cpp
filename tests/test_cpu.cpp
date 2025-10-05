@@ -443,3 +443,19 @@ TEST_F(CpuTest, LD_I_SetsValueOfRegisterIToNNN) {
   // Assert
   EXPECT_EQ(cpu.index_register(), 0x0FEDu);
 }
+
+TEST_F(CpuTest, JP_V0_JumpsToNNNPlusV0) {
+  // Arrange: set v[0x00] = 0xAB
+  memory.write_byte(0x200, 0x60u);
+  memory.write_byte(0x201, 0xABu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x00], 0xABu);
+
+  // Act
+  memory.write_byte(0x202, 0xB8u);
+  memory.write_byte(0x203, 0x79u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), 0x00ABu + 0x0879u);
+}

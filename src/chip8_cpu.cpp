@@ -41,6 +41,9 @@ void Cpu::execute() {
   case 0xA000:
     execute_A(opcode);
     break;
+  case 0xB000:
+    execute_B(opcode);
+    break;
   default:
     break;
   }
@@ -170,6 +173,11 @@ void Cpu::execute_9(uint16_t opcode) noexcept {
 void Cpu::execute_A(uint16_t opcode) noexcept {
   uint16_t nnn = opcode & 0x0FFF;
   I_ = nnn;
+}
+
+void Cpu::execute_B(uint16_t opcode) noexcept {
+  uint16_t nnn = opcode & 0x0FFF;
+  pc_ = v_[0x00] + nnn;
 }
 
 } // namespace chip8
