@@ -44,6 +44,9 @@ void Cpu::execute() {
   case 0xB000:
     execute_B(opcode);
     break;
+  case 0xC000:
+    execute_C(opcode);
+    break;
   default:
     break;
   }
@@ -178,6 +181,12 @@ void Cpu::execute_A(uint16_t opcode) noexcept {
 void Cpu::execute_B(uint16_t opcode) noexcept {
   uint16_t nnn = opcode & 0x0FFF;
   pc_ = v_[0x00] + nnn;
+}
+
+void Cpu::execute_C(uint16_t opcode) noexcept {
+  uint8_t x = (opcode >> 8) & 0x0F;
+  uint8_t kk = opcode & 0x00FF;
+  v_[x] = rng_.get().next(kk);
 }
 
 } // namespace chip8

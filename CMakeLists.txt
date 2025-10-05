@@ -31,7 +31,7 @@ add_executable(chip8_tests
     tests/test_display.cpp
     tests/test_cpu.cpp
 )
-target_link_libraries(chip8_tests PRIVATE chip8_core GTest::gtest_main SDL2::SDL2)
+target_link_libraries(chip8_tests PRIVATE chip8_core GTest::gtest_main GTest::gmock SDL2::SDL2)
 
 include(GoogleTest)
 gtest_discover_tests(chip8_tests)

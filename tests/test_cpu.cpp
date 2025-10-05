@@ -2,9 +2,9 @@
 #include "chip8_display.h"
 #include "chip8_keyboard.h"
 #include "chip8_memory.h"
-#include "chip8_pcg_rand.h"
 #include "chip8_timer.h"
 #include "constants.h"
+#include "mock_rng.h"
 #include "gtest/gtest.h"
 
 class CpuTest : public ::testing::Test {
@@ -13,7 +13,7 @@ protected:
   chip8::Display display;
   chip8::Keyboard keyboard;
   chip8::Timer timer;
-  chip8::PcgRandom rng;
+  MockRandom rng;
   chip8::Cpu cpu{memory, display, keyboard, timer, rng};
 };
 
@@ -458,4 +458,17 @@ TEST_F(CpuTest, JP_V0_JumpsToNNNPlusV0) {
 
   // Assert
   EXPECT_EQ(cpu.program_counter(), 0x00ABu + 0x0879u);
+}
+
+TEST_F(CpuTest, RND_Vx_SetsVxRndByteAndKK) {
+  // Arrange
+  memory.write_byte(0x200, 0xC0u);
+  memory.write_byte(0x201, 0xBCu);
+  EXPECT_CALL(rng, next(0xBC)).Times(1).WillOnce(::testing::Return(0x34u));
+
+  // Act
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x00], 0x34u);
 }

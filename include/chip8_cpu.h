@@ -1,8 +1,8 @@
 #pragma once
 #include "chip8_display.h"
+#include "chip8_irand_gen.h"
 #include "chip8_keyboard.h"
 #include "chip8_memory.h"
-#include "chip8_pcg_rand.h"
 #include "chip8_timer.h"
 #include "constants.h"
 #include <array>
@@ -15,7 +15,7 @@ namespace chip8 {
 class Cpu {
 public:
   explicit constexpr Cpu(Memory &memory, Display &display, Keyboard &keyboard,
-                         Timer &timer, PcgRandom &rng) noexcept
+                         Timer &timer, RandomGenerator &rng) noexcept
       : memory_(memory), display_(display), keyboard_(keyboard), timer_(timer),
         rng_(rng) {
     reset();
@@ -49,12 +49,13 @@ private:
   void execute_9(uint16_t opcode) noexcept;
   void execute_A(uint16_t opcode) noexcept;
   void execute_B(uint16_t opcode) noexcept;
+  void execute_C(uint16_t opcode) noexcept;
 
   std::reference_wrapper<Memory> memory_;
   std::reference_wrapper<Display> display_;
   std::reference_wrapper<Keyboard> keyboard_;
   std::reference_wrapper<Timer> timer_;
-  std::reference_wrapper<PcgRandom> rng_;
+  std::reference_wrapper<RandomGenerator> rng_;
 
   std::array<uint16_t, NUM_CPU_STACK> stack_{};
   std::array<uint8_t, NUM_CPU_REGISTERS> v_{};
