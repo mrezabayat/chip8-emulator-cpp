@@ -144,6 +144,10 @@ void Cpu::execute_8(uint16_t opcode) noexcept {
     v_[0x0F] = v_[x] > v_[y];
     v_[y] -= v_[x];
     break;
+  case 0x0E:
+    v_[0x0F] = (v_[x] & 0b10000000u) != 0x00u ? 0x01u : 0x00u;
+    v_[x] <<= 1;
+    break;
   default:
     break;
   }

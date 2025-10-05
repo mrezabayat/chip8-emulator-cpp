@@ -375,3 +375,37 @@ TEST_F(CpuTest, SUB_VyVx_WhenVxIsGreaterThanVy) {
   EXPECT_EQ(cpu.registers()[0x0A], 0x1Cu);
   EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
 }
+
+TEST_F(CpuTest, SHL_Vx_MultiplyVxBy2WhenMostSignificantBitIsZero) {
+  // Arrange: set v[0x03] = 0x64
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x64u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x64u);
+
+  // Act
+  memory.write_byte(0x202, 0x83u);
+  memory.write_byte(0x203, 0x0Eu);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0xC8u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
+}
+
+TEST_F(CpuTest, SHL_Vx_MultiplyVxBy2WhenMostSignificantBitIsOne) {
+  // Arrange: set v[0x03] = 0xA5
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0xA5u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0xA5u);
+
+  // Act
+  memory.write_byte(0x202, 0x83u);
+  memory.write_byte(0x203, 0x0Eu);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x03], 0x4Au);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+}
