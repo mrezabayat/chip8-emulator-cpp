@@ -35,6 +35,9 @@ void Cpu::execute() {
   case 0x8000:
     execute_8(opcode);
     break;
+  case 0x9000:
+    execute_9(opcode);
+    break;
   default:
     break;
   }
@@ -150,6 +153,14 @@ void Cpu::execute_8(uint16_t opcode) noexcept {
     break;
   default:
     break;
+  }
+}
+
+void Cpu::execute_9(uint16_t opcode) noexcept {
+  uint8_t x = (opcode >> 8) & 0x0F;
+  uint8_t y = (opcode & 0x00F0) >> 4;
+  if (v_[x] != v_[y]) {
+    pc_ += 2;
   }
 }
 

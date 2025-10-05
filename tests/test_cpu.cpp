@@ -409,3 +409,25 @@ TEST_F(CpuTest, SHL_Vx_MultiplyVxBy2WhenMostSignificantBitIsOne) {
   EXPECT_EQ(cpu.registers()[0x03], 0x4Au);
   EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
 }
+
+TEST_F(CpuTest, SNE_VxVy_SkipsNextInstructionIfVxNEVy) {
+  // Arrange: set v[0x03] = 0x64 and v[0x0A] = 0x80
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x64u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x64u);
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x80u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0A], 0x80u);
+
+  // Act
+  memory.write_byte(0x204, 0x93u);
+  memory.write_byte(0x205, 0xA0u);
+  uint16_t before = cpu.program_counter();
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), before + 4);
+}
