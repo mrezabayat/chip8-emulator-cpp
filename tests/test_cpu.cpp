@@ -431,3 +431,15 @@ TEST_F(CpuTest, SNE_VxVy_SkipsNextInstructionIfVxNEVy) {
   // Assert
   EXPECT_EQ(cpu.program_counter(), before + 4);
 }
+
+TEST_F(CpuTest, LD_I_SetsValueOfRegisterIToNNN) {
+  // Arrange
+  memory.write_byte(0x200, 0xAF);
+  memory.write_byte(0x201, 0xED);
+
+  // Act
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.index_register(), 0x0FEDu);
+}
