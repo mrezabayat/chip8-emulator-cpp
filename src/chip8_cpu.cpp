@@ -47,6 +47,9 @@ void Cpu::execute() {
   case 0xC000:
     execute_C(opcode);
     break;
+  case 0xD000:
+    execute_D(opcode);
+    break;
   default:
     break;
   }
@@ -187,6 +190,15 @@ void Cpu::execute_C(uint16_t opcode) noexcept {
   uint8_t x = (opcode >> 8) & 0x0F;
   uint8_t kk = opcode & 0x00FF;
   v_[x] = rng_.get().next(kk);
+}
+
+void Cpu::execute_D(uint16_t opcode) noexcept {
+  uint8_t x = (opcode >> 8) & 0x0F;
+  uint8_t y = (opcode & 0x00F0) >> 4;
+  uint8_t n = opcode & 0x000F;
+
+  auto sprite = memory_.get().span().subspan(I_, n);
+  v_[0x0F] = display_.get().draw_sprite(v_[x], v_[y], sprite) ? 1 : 0;
 }
 
 } // namespace chip8

@@ -3,6 +3,7 @@
 #include "constants.h"
 #include <array>
 #include <cstdint>
+#include <span>
 
 namespace chip8 {
 
@@ -26,9 +27,10 @@ public:
   }
 
   // Draw sprite at (x,y), returns true if collision occurred
-  bool draw_sprite(int x, int y, const uint8_t *sprite, int rows) noexcept {
+  [[nodiscard]] bool draw_sprite(int x, int y,
+                                 std::span<const uint8_t> sprite) noexcept {
     bool collision = false;
-    for (int row = 0; row < rows; ++row) {
+    for (int row = 0; row < static_cast<int>(sprite.size()); ++row) {
       uint8_t line = sprite[row];
       for (int bit = 0; bit < 8; ++bit) {
         if (line & (0b10000000 >> bit)) {

@@ -32,7 +32,7 @@ TEST(DisplayTest, ClearResetsAllPixels) {
 TEST(DisplayTest, DrawSpriteWithoutCollision) {
   chip8::Display d;
   uint8_t sprite[2] = {0b11110000, 0b00001111};
-  bool collision = d.draw_sprite(0, 0, sprite, 2);
+  bool collision = d.draw_sprite(0, 0, sprite);
 
   EXPECT_FALSE(collision);
   EXPECT_TRUE(d.is_pixel_set(0, 0));
@@ -43,8 +43,8 @@ TEST(DisplayTest, DrawSpriteWithCollision) {
   chip8::Display d;
   uint8_t sprite[1] = {0b11110000};
 
-  d.draw_sprite(0, 0, sprite, 1);                  // first time
-  bool collision = d.draw_sprite(0, 0, sprite, 1); // second time → XOR clears
+  auto _ = d.draw_sprite(0, 0, sprite);         // first time
+  bool collision = d.draw_sprite(0, 0, sprite); // second time → XOR clears
 
   EXPECT_TRUE(collision);
   EXPECT_FALSE(d.is_pixel_set(0, 0)); // flipped off

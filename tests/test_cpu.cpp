@@ -472,3 +472,93 @@ TEST_F(CpuTest, RND_Vx_SetsVxRndByteAndKK) {
   // Assert
   EXPECT_EQ(cpu.registers()[0x00], 0x34u);
 }
+
+TEST_F(CpuTest, DRW_DrawSpriteWithoutCollision) {
+  // Arrange: simple one byte sprite
+  memory.write_byte(0x300, 0b11110101u);
+
+  // set I = 0x300
+  memory.write_byte(0x200, 0xA3u);
+  memory.write_byte(0x201, 0x00u);
+  cpu.execute();
+
+  // Act
+  EXPECT_EQ(cpu.registers()[0], 0);
+  EXPECT_EQ(cpu.registers()[1], 0);
+
+  memory.write_byte(0x202, 0xD0u);
+  memory.write_byte(0x203, 0x11u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_TRUE(display.is_pixel_set(0, 0));
+  EXPECT_TRUE(display.is_pixel_set(1, 0));
+  EXPECT_TRUE(display.is_pixel_set(2, 0));
+  EXPECT_TRUE(display.is_pixel_set(3, 0));
+  EXPECT_TRUE(!display.is_pixel_set(4, 0));
+  EXPECT_TRUE(display.is_pixel_set(5, 0));
+  EXPECT_TRUE(!display.is_pixel_set(6, 0));
+  EXPECT_TRUE(display.is_pixel_set(7, 0));
+}
+
+TEST_F(CpuTest, DRW_DrawSpriteWithCollision) {
+  // Arrange: simple one byte sprite
+  memory.write_byte(0x300, 0b11110101u);
+
+  // set I = 0x300
+  memory.write_byte(0x200, 0xA3u);
+  memory.write_byte(0x201, 0x00u);
+  cpu.execute();
+
+  // Act
+  EXPECT_EQ(cpu.registers()[0], 0);
+  EXPECT_EQ(cpu.registers()[1], 0);
+
+  // draw for the first time
+  memory.write_byte(0x202, 0xD0u);
+  memory.write_byte(0x203, 0x11u);
+  cpu.execute();
+
+  // second time draw should toggle on pixels off
+  memory.write_byte(0x204, 0xD0u);
+  memory.write_byte(0x205, 0x11u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x0F], 1);
+  for (int dx = 0; dx < 8; ++dx) {
+    EXPECT_FALSE(display.is_pixel_set(dx, 0));
+  }
+}
+
+TEST_F(CpuTest, DRW_DrawSpriteNearEdgeWrapsAround) {
+  // Arrange: simple two byte sprite
+  memory.write_byte(0x300, 0xFFu);
+  memory.write_byte(0x301, 0xFFu);
+
+  // set I = 0x300
+  memory.write_byte(0x200, 0xA3u);
+  memory.write_byte(0x201, 0x00u);
+  cpu.execute();
+
+  // set V[0] = 60, V[1] = 30
+  memory.write_byte(0x202, 0x60u);
+  memory.write_byte(0x203, 0x3Cu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0], 0x3Cu);
+  memory.write_byte(0x204, 0x61u);
+  memory.write_byte(0x205, 0x1Fu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[1], 0x1Fu);
+
+  // Act
+  memory.write_byte(0x206, 0xD0u);
+  memory.write_byte(0x207, 0x12u);
+  cpu.execute();
+
+  // Assert
+  for (int dx = 0; dx < 8; ++dx) {
+    EXPECT_TRUE(display.is_pixel_set((60 + dx) % 64, 31));
+    EXPECT_TRUE(display.is_pixel_set((60 + dx) % 64, 0));
+  }
+}
