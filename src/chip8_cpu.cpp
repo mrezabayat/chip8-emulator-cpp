@@ -257,6 +257,14 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
     break;
   case 0x29:
     I_ = v_[x] * 5;
+    break;
+  case 0x33: {
+    uint8_t value = v_[x];
+    memory_.get().write_byte(I_, value / 100);           // hundreds
+    memory_.get().write_byte(I_ + 1, (value / 10) % 10); // tens
+    memory_.get().write_byte(I_ + 2, value % 10);        // ones
+    break;
+  }
   default:
     break;
   }

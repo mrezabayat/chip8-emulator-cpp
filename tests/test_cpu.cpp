@@ -718,3 +718,27 @@ TEST_F(CpuTest, Fx29_SetsIndexToFontSpriteForVx) {
   // Assert each font character = 5 bytes, so 10 * 5 = 50
   EXPECT_EQ(cpu.index_register(), 0x32u);
 }
+
+TEST_F(CpuTest, Fx33_StoresBCDRepresentationOfVxInMemory) {
+  // Arrange load V1 = 234 (0xEA)
+  memory.write_byte(0x200, 0x61u);
+  memory.write_byte(0x201, 0xEAu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[1], 234);
+
+  // Set I = 0x300
+  memory.write_byte(0x202, 0xA3u); // Annn - LD I, addr
+  memory.write_byte(0x203, 0x00u);
+  cpu.execute();
+  EXPECT_EQ(cpu.index_register(), 0x300u);
+
+  // Act: Execute Fx33 (Store BCD of V1 at memory[I..I+2])
+  memory.write_byte(0x204, 0xF1u);
+  memory.write_byte(0x205, 0x33u);
+  cpu.execute();
+
+  // Assert: memory[0x300..0x302] = 2, 3, 4
+  EXPECT_EQ(memory.read_byte(0x300), 2u);
+  EXPECT_EQ(memory.read_byte(0x301), 3u);
+  EXPECT_EQ(memory.read_byte(0x302), 4u);
+}
