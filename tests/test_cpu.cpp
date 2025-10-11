@@ -659,3 +659,19 @@ TEST_F(CpuTest, Fx15_LoadsDelayTimerFromVx) {
   // Assert
   EXPECT_EQ(timer.delay(), 0x0Cu);
 }
+
+TEST_F(CpuTest, Fx18_LoadsSoundTimerFromVx) {
+  // Arrange: set v[0x02] = 0x0C
+  memory.write_byte(0x200, 0x62u);
+  memory.write_byte(0x201, 0x0Cu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x02], 0x0Cu);
+
+  // Act
+  memory.write_byte(0x202, 0xF2);
+  memory.write_byte(0x203, 0x18);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(timer.sound(), 0x0Cu);
+}
