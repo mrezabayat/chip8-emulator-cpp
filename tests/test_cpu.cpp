@@ -643,3 +643,19 @@ TEST_F(CpuTest, LD_Vx_K_StoresPressedKeyAndAdvances) {
   EXPECT_EQ(cpu.registers()[0], 0xA);
   EXPECT_EQ(cpu.program_counter(), old_pc + 2);
 }
+
+TEST_F(CpuTest, Fx15_LoadsDelayTimerFromVx) {
+  // Arrange: set v[0x02] = 0x0C
+  memory.write_byte(0x200, 0x62u);
+  memory.write_byte(0x201, 0x0Cu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x02], 0x0Cu);
+
+  // Act
+  memory.write_byte(0x202, 0xF2);
+  memory.write_byte(0x203, 0x15);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(timer.delay(), 0x0Cu);
+}

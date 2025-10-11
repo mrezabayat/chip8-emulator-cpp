@@ -246,6 +246,9 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
     }
     break;
   }
+  case 0x15:
+    timer_.get().set_delay(v_[x]);
+    break;
   default:
     break;
   }
