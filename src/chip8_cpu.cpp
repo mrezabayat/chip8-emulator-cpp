@@ -265,6 +265,12 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
     memory_.get().write_byte(I_ + 2, value % 10);        // ones
     break;
   }
+  case 0x55: {
+    for (uint8_t i = 0; i <= x; ++i) {
+      memory_.get().write_byte(I_ + i, v_[i]);
+    }
+    break;
+  }
   default:
     break;
   }

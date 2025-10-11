@@ -742,3 +742,44 @@ TEST_F(CpuTest, Fx33_StoresBCDRepresentationOfVxInMemory) {
   EXPECT_EQ(memory.read_byte(0x301), 3u);
   EXPECT_EQ(memory.read_byte(0x302), 4u);
 }
+
+TEST_F(CpuTest, Fx55_StoresRegistersV0ToVxIntoMemoryStartingAtI) {
+  // Arrange
+  // Set V0..V3 = 0x10, 0x20, 0x30, 0x40
+  memory.write_byte(0x200, 0x60u);
+  memory.write_byte(0x201, 0x10u);
+  memory.write_byte(0x202, 0x61u);
+  memory.write_byte(0x203, 0x20u);
+  memory.write_byte(0x204, 0x62u);
+  memory.write_byte(0x205, 0x30u);
+  memory.write_byte(0x206, 0x63u);
+  memory.write_byte(0x207, 0x40u);
+
+  for (int i = 0; i < 4; ++i)
+    cpu.execute();
+
+  EXPECT_EQ(cpu.registers()[0], 0x10);
+  EXPECT_EQ(cpu.registers()[1], 0x20);
+  EXPECT_EQ(cpu.registers()[2], 0x30);
+  EXPECT_EQ(cpu.registers()[3], 0x40);
+
+  // Set I = 0x300
+  memory.write_byte(0x208, 0xA3u);
+  memory.write_byte(0x209, 0x00u);
+  cpu.execute();
+  EXPECT_EQ(cpu.index_register(), 0x300u);
+
+  // Act: Execute Fx55 (LD [I], V3)
+  memory.write_byte(0x20A, 0xF3u);
+  memory.write_byte(0x20B, 0x55u);
+  cpu.execute();
+
+  // Assert: memory[0x300..0x303] == V0..V3
+  EXPECT_EQ(memory.read_byte(0x300), 0x10);
+  EXPECT_EQ(memory.read_byte(0x301), 0x20);
+  EXPECT_EQ(memory.read_byte(0x302), 0x30);
+  EXPECT_EQ(memory.read_byte(0x303), 0x40);
+
+  // I should remain unchanged
+  EXPECT_EQ(cpu.index_register(), 0x300u);
+}
