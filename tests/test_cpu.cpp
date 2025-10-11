@@ -675,3 +675,28 @@ TEST_F(CpuTest, Fx18_LoadsSoundTimerFromVx) {
   // Assert
   EXPECT_EQ(timer.sound(), 0x0Cu);
 }
+
+TEST_F(CpuTest, Fx1E_AddsValueOfVxToI) {
+  // Arrange: set v[0x0A] = 0x11
+  memory.write_byte(0x200, 0x6Au);
+  memory.write_byte(0x201, 0x11u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0A], 0x11u);
+  EXPECT_EQ(cpu.index_register(), 0);
+
+  // Act
+  memory.write_byte(0x202, 0xFA);
+  memory.write_byte(0x203, 0x1E);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.index_register(), 0x11u);
+
+  // Act One more time
+  memory.write_byte(0x204, 0xFA);
+  memory.write_byte(0x205, 0x1E);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.index_register(), 0x22u);
+}

@@ -9,7 +9,9 @@ namespace chip8 {
 
 class Memory {
 public:
-  constexpr explicit Memory() noexcept : data_{} {};
+  constexpr explicit Memory() noexcept : data_{} {
+    std::copy(DEFAULT_CHAR_SET.begin(), DEFAULT_CHAR_SET.end(), data_.begin());
+  };
 
   constexpr void write_byte(uint16_t addr, uint8_t val) {
     check_bounds(addr);
