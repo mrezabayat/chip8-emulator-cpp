@@ -700,3 +700,21 @@ TEST_F(CpuTest, Fx1E_AddsValueOfVxToI) {
   // Assert
   EXPECT_EQ(cpu.index_register(), 0x22u);
 }
+
+TEST_F(CpuTest, Fx29_SetsIndexToFontSpriteForVx) {
+  // Arrange set V1 = 0x0A
+  memory.write_byte(0x200, 0x61u);
+  memory.write_byte(0x201, 0x0Au);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[1], 0x0Au);
+
+  // Load sprite address for V1
+  memory.write_byte(0x202, 0xF1u);
+  memory.write_byte(0x203, 0x29u);
+
+  // Act
+  cpu.execute();
+
+  // Assert each font character = 5 bytes, so 10 * 5 = 50
+  EXPECT_EQ(cpu.index_register(), 0x32u);
+}

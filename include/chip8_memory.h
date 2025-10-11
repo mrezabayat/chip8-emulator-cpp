@@ -1,5 +1,6 @@
 #pragma once
 #include "constants.h"
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <span>

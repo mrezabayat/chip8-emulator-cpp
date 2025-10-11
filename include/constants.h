@@ -10,9 +10,10 @@ inline constexpr uint8_t SCREEN_HEIGHT = 32;
 inline constexpr uint16_t START_ADDRESS = 0x200;
 inline constexpr uint8_t NUM_CPU_STACK = 16;
 inline constexpr uint8_t NUM_CPU_REGISTERS = 16;
+inline constexpr uint8_t HEIGHT_OF_CHAR = 5;
 
 /* clang-format off */
-inline constexpr std::array<uint8_t, 80> DEFAULT_CHAR_SET = {
+inline constexpr std::array<uint8_t, HEIGHT_OF_CHAR * NUM_KEYS> DEFAULT_CHAR_SET = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2

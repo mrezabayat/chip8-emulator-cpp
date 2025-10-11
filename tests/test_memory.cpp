@@ -5,7 +5,11 @@
 
 TEST(MemoryTest, CtorCreatesClearMemory) {
   chip8::Memory memory;
-  for (uint16_t index = 0; index < chip8::MEMORY_SIZE; ++index) {
+  for (uint16_t index = 0; index < chip8::DEFAULT_CHAR_SET.size(); ++index) {
+    EXPECT_EQ(memory.read_byte(index), chip8::DEFAULT_CHAR_SET[index]);
+  }
+  for (uint16_t index = chip8::DEFAULT_CHAR_SET.size();
+       index < chip8::MEMORY_SIZE; ++index) {
     EXPECT_EQ(memory.read_byte(index), 0);
   }
 }

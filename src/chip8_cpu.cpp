@@ -255,6 +255,8 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
   case 0x1E:
     I_ += v_[x];
     break;
+  case 0x29:
+    I_ = v_[x] * 5;
   default:
     break;
   }
