@@ -236,7 +236,16 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
   case 0x07:
     v_[x] = timer_.get().delay();
     break;
-
+  case 0x0A: {
+    auto key = keyboard_.get().last_pressed();
+    if (key.has_value()) {
+      v_[x] = key.value();
+      keyboard_.get().clear_last_pressed();
+    } else {
+      pc_ -= 2;
+    }
+    break;
+  }
   default:
     break;
   }

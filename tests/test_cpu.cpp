@@ -612,3 +612,34 @@ TEST_F(CpuTest, Fx07_PutsValueOfDelayTimerInRegister) {
   // Assert
   EXPECT_EQ(cpu.registers()[0x0A], 0xFAu);
 }
+
+TEST_F(CpuTest, LD_Vx_K_DoesNotAdvanceWhenNoKeyPressed) {
+  // Arrange: opcode Fx0A (wait for key press, store in Vx)
+  memory.write_byte(0x200, 0xF0u);
+  memory.write_byte(0x201, 0x0Au);
+
+  uint16_t old_pc = cpu.program_counter();
+
+  // Act: execute once — no key pressed yet
+  cpu.execute();
+
+  // Assert: CPU should not advance PC
+  EXPECT_EQ(cpu.program_counter(), old_pc)
+      << "PC advanced despite no key being pressed.";
+}
+
+TEST_F(CpuTest, LD_Vx_K_StoresPressedKeyAndAdvances) {
+  // Arrange
+  memory.write_byte(0x200, 0xF0u);
+  memory.write_byte(0x201, 0x0Au);
+
+  uint16_t old_pc = cpu.program_counter();
+  keyboard.set_key_state(0xA, true);
+
+  // Act
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0], 0xA);
+  EXPECT_EQ(cpu.program_counter(), old_pc + 2);
+}
