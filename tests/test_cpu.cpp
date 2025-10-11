@@ -580,3 +580,21 @@ TEST_F(CpuTest, SKP_SkipsNextInstructionWhenKeyPressed) {
   // Assert
   EXPECT_EQ(cpu.program_counter(), before + 4);
 }
+
+TEST_F(CpuTest, SKNP_SkipsNextInstructionWhenKeyNotPressed) {
+  // Arrange: set value of v[0x02] = 0x0C
+  memory.write_byte(0x200, 0x62u);
+  memory.write_byte(0x201, 0x0Cu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x02], 0x0Cu);
+  keyboard.set_key_state(0x0C, false);
+
+  // Act
+  memory.write_byte(0x202, 0xE2u);
+  memory.write_byte(0x203, 0xA1u);
+  auto before = cpu.program_counter();
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), before + 4);
+}

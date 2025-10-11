@@ -214,6 +214,11 @@ void Cpu::execute_E(uint16_t opcode) noexcept {
     }
     break;
 
+  case 0xA1:
+    if (!keyboard_.get().is_pressed(v_[x])) {
+      pc_ += 2;
+    }
+    break;
   default:
     break;
   }
