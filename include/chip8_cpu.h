@@ -51,6 +51,7 @@ private:
   void execute_B(uint16_t opcode) noexcept;
   void execute_C(uint16_t opcode) noexcept;
   void execute_D(uint16_t opcode) noexcept;
+  void execute_E(uint16_t opcode) noexcept;
 
   std::reference_wrapper<Memory> memory_;
   std::reference_wrapper<Display> display_;

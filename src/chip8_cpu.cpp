@@ -50,6 +50,8 @@ void Cpu::execute() {
   case 0xD000:
     execute_D(opcode);
     break;
+  case 0xE000:
+    execute_E(opcode);
   default:
     break;
   }
@@ -199,6 +201,22 @@ void Cpu::execute_D(uint16_t opcode) noexcept {
 
   auto sprite = memory_.get().span().subspan(I_, n);
   v_[0x0F] = display_.get().draw_sprite(v_[x], v_[y], sprite) ? 1 : 0;
+}
+
+void Cpu::execute_E(uint16_t opcode) noexcept {
+  uint8_t x = (opcode >> 8) & 0x0F;
+  uint8_t kk = opcode & 0x00FF;
+
+  switch (kk) {
+  case 0x9E:
+    if (keyboard_.get().is_pressed(v_[x])) {
+      pc_ += 2;
+    }
+    break;
+
+  default:
+    break;
+  }
 }
 
 } // namespace chip8
