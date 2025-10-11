@@ -598,3 +598,17 @@ TEST_F(CpuTest, SKNP_SkipsNextInstructionWhenKeyNotPressed) {
   // Assert
   EXPECT_EQ(cpu.program_counter(), before + 4);
 }
+
+TEST_F(CpuTest, Fx07_PutsValueOfDelayTimerInRegister) {
+  // Arrange
+  timer.set_delay(0xFAu);
+  EXPECT_EQ(cpu.registers()[0x0A], 0);
+
+  // Act
+  memory.write_byte(0x200, 0xFAu);
+  memory.write_byte(0x201, 0x07u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.registers()[0x0A], 0xFAu);
+}

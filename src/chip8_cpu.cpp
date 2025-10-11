@@ -52,6 +52,10 @@ void Cpu::execute() {
     break;
   case 0xE000:
     execute_E(opcode);
+    break;
+  case 0xF000:
+    execute_F(opcode);
+    break;
   default:
     break;
   }
@@ -219,6 +223,20 @@ void Cpu::execute_E(uint16_t opcode) noexcept {
       pc_ += 2;
     }
     break;
+  default:
+    break;
+  }
+}
+
+void Cpu::execute_F(uint16_t opcode) noexcept {
+  uint8_t x = (opcode >> 8) & 0x0F;
+  uint8_t kk = opcode & 0x00FF;
+
+  switch (kk) {
+  case 0x07:
+    v_[x] = timer_.get().delay();
+    break;
+
   default:
     break;
   }
