@@ -271,6 +271,13 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
     }
     break;
   }
+  case 0x65: { // Fx65 - LD Vx, [I]
+    for (uint8_t i = 0; i <= x; ++i) {
+      v_[i] = memory_.get().read_byte(I_ + i);
+    }
+    break;
+  }
+
   default:
     break;
   }

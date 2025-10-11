@@ -783,3 +783,31 @@ TEST_F(CpuTest, Fx55_StoresRegistersV0ToVxIntoMemoryStartingAtI) {
   // I should remain unchanged
   EXPECT_EQ(cpu.index_register(), 0x300u);
 }
+
+TEST_F(CpuTest, Fx65_LoadsRegistersV0ToVxFromMemoryStartingAtI) {
+  // Arrange initialize memory with some values starting at I = 0x300
+  memory.write_byte(0x300, 0x11u);
+  memory.write_byte(0x301, 0x22u);
+  memory.write_byte(0x302, 0x33u);
+  memory.write_byte(0x303, 0x44u);
+
+  // Set I = 0x300
+  memory.write_byte(0x200, 0xA3u);
+  memory.write_byte(0x201, 0x00u);
+  cpu.execute();
+  EXPECT_EQ(cpu.index_register(), 0x300u);
+
+  // Act: Execute Fx65 (LD V3, [I]) — read 4 values
+  memory.write_byte(0x202, 0xF3u);
+  memory.write_byte(0x203, 0x65u);
+  cpu.execute();
+
+  // Assert: registers should match memory contents
+  EXPECT_EQ(cpu.registers()[0], 0x11u);
+  EXPECT_EQ(cpu.registers()[1], 0x22u);
+  EXPECT_EQ(cpu.registers()[2], 0x33u);
+  EXPECT_EQ(cpu.registers()[3], 0x44u);
+
+  // I should remain unchanged
+  EXPECT_EQ(cpu.index_register(), 0x300u);
+}
