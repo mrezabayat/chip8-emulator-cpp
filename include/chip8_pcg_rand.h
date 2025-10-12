@@ -14,6 +14,8 @@ public:
     return static_cast<uint8_t>(dist_(engine_) & mask);
   }
 
+  void reseed(uint64_t seed) { engine_.seed(seed); }
+
 private:
   std::mt19937_64 engine_;
   std::uniform_int_distribution<int> dist_;
