@@ -19,12 +19,14 @@ jobs:
         include:
           - os: ubuntu-latest
             build_type: Release
-            build_preset: conan-release
-            test_preset: conan-release
+            configure_preset: conan-release
+            build_preset: conan-default
+            test_preset: conan-default
           - os: windows-latest
             build_type: Release
-            build_preset: conan-release
-            test_preset: conan-release
+            configure_preset: conan-default
+            build_preset: conan-default
+            test_preset: conan-default
 
     steps:
       - uses: actions/checkout@v4
@@ -104,7 +106,9 @@ jobs:
             libxcb-present-dev \
             libxcb-composite0-dev \
             libxcb-ewmh-dev \
-            libxcb-res0-dev
+            libxcb-res0-dev \
+            libxcb-util-dev \
+            libxcb-util0-dev
 
       - name: Set up MSVC
         if: runner.os == 'Windows'
@@ -124,10 +128,20 @@ jobs:
             --output-folder=build/${{ matrix.build_type }}
 
       - name: Configure CMake
-        run: cmake --preset ${{ matrix.build_preset }}
+        run: cmake --preset ${{ matrix.configure_preset }}
 
       - name: Build
+        if: runner.os != 'Windows'
         run: cmake --build --preset ${{ matrix.build_preset }}
 
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build --preset ${{ matrix.build_preset }} --config ${{ matrix.build_type }}
+
       - name: Test
+        if: runner.os != 'Windows'
         run: ctest --preset ${{ matrix.test_preset }} --output-on-failure
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        run: ctest --preset ${{ matrix.test_preset }} --output-on-failure --build-config ${{ matrix.build_type }}
