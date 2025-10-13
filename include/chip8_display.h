@@ -48,9 +48,14 @@ public:
 
 private:
   // Wrap coordinates (Chip-8 wraps around screen edges)
+  [[nodiscard]] static constexpr int wrap_coord(int value, int max) noexcept {
+    const int mod = value % max;
+    return mod < 0 ? mod + max : mod;
+  }
+
   [[nodiscard]] static constexpr std::pair<int, int> wrap(int x,
                                                           int y) noexcept {
-    return {x % SCREEN_WIDTH, y % SCREEN_HEIGHT};
+    return {wrap_coord(x, SCREEN_WIDTH), wrap_coord(y, SCREEN_HEIGHT)};
   }
 
   std::array<uint8_t, SCREEN_WIDTH * SCREEN_HEIGHT> buffer_;

@@ -29,3 +29,15 @@ TEST(KeyboardTest, OutOfRangeKeyThrows) {
   EXPECT_THROW(keyboard.set_key_state(chip8::NUM_KEYS, false),
                std::out_of_range);
 }
+
+TEST(KeyboardTest, LastPressedClearsWhenKeyReleased) {
+  chip8::Keyboard keyboard;
+  constexpr uint8_t key = 5;
+
+  keyboard.set_key_state(key, true);
+  ASSERT_TRUE(keyboard.last_pressed().has_value());
+  EXPECT_EQ(keyboard.last_pressed().value(), key);
+
+  keyboard.set_key_state(key, false);
+  EXPECT_FALSE(keyboard.last_pressed().has_value());
+}

@@ -16,6 +16,8 @@ public:
     keys_[key] = pressed;
     if (pressed) {
       last_pressed_ = key;
+    } else if (last_pressed_.has_value() && last_pressed_.value() == key) {
+      last_pressed_.reset();
     }
   }
 

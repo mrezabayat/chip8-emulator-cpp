@@ -19,11 +19,11 @@ protected:
 TEST_F(SdlInputTest, PressingAndReleasingMappedKeySetsKeyState) {
   auto event = make_event(SDL_SCANCODE_1, SDL_KEYDOWN);
   input.handle_event(event);
-  EXPECT_TRUE(kb.is_pressed(0x0));
+  EXPECT_TRUE(kb.is_pressed(0x1));
 
   event.type = SDL_KEYUP;
   input.handle_event(event);
-  EXPECT_FALSE(kb.is_pressed(0x0));
+  EXPECT_FALSE(kb.is_pressed(0x1));
 }
 
 TEST_F(SdlInputTest, UnmappedKeyDoesNothing) {

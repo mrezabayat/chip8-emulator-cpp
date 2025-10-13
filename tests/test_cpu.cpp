@@ -273,7 +273,7 @@ TEST_F(CpuTest, SUB_VxVy_WhenVxIsGreaterThanVy) {
 
   // Assert
   EXPECT_EQ(cpu.registers()[0x03], 0x1Cu);
-  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
 }
 
 TEST_F(CpuTest, SUB_VxVy_WhenVxIsLessThanVy) {
@@ -295,7 +295,7 @@ TEST_F(CpuTest, SUB_VxVy_WhenVxIsLessThanVy) {
 
   // Assert
   EXPECT_EQ(cpu.registers()[0x03], 0xE4u);
-  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
 }
 
 TEST_F(CpuTest, SHR_Vx_DivdeVxBy2WhenItIsEven) {
@@ -350,8 +350,9 @@ TEST_F(CpuTest, SUB_VyVx_WhenVyIsLessThanVx) {
   cpu.execute();
 
   // Assert
-  EXPECT_EQ(cpu.registers()[0x0A], 0xE4u);
-  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+  EXPECT_EQ(cpu.registers()[0x03], 0xE4u);
+  EXPECT_EQ(cpu.registers()[0x0A], 0x64u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
 }
 
 TEST_F(CpuTest, SUB_VyVx_WhenVxIsGreaterThanVy) {
@@ -372,8 +373,9 @@ TEST_F(CpuTest, SUB_VyVx_WhenVxIsGreaterThanVy) {
   cpu.execute();
 
   // Assert
-  EXPECT_EQ(cpu.registers()[0x0A], 0x1Cu);
-  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
+  EXPECT_EQ(cpu.registers()[0x03], 0x1Cu);
+  EXPECT_EQ(cpu.registers()[0x0A], 0x80u);
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
 }
 
 TEST_F(CpuTest, SHL_Vx_MultiplyVxBy2WhenMostSignificantBitIsZero) {
@@ -780,8 +782,8 @@ TEST_F(CpuTest, Fx55_StoresRegistersV0ToVxIntoMemoryStartingAtI) {
   EXPECT_EQ(memory.read_byte(0x302), 0x30);
   EXPECT_EQ(memory.read_byte(0x303), 0x40);
 
-  // I should remain unchanged
-  EXPECT_EQ(cpu.index_register(), 0x300u);
+  // I should now point past the stored block
+  EXPECT_EQ(cpu.index_register(), 0x304u);
 }
 
 TEST_F(CpuTest, Fx65_LoadsRegistersV0ToVxFromMemoryStartingAtI) {
@@ -808,6 +810,6 @@ TEST_F(CpuTest, Fx65_LoadsRegistersV0ToVxFromMemoryStartingAtI) {
   EXPECT_EQ(cpu.registers()[2], 0x33u);
   EXPECT_EQ(cpu.registers()[3], 0x44u);
 
-  // I should remain unchanged
-  EXPECT_EQ(cpu.index_register(), 0x300u);
+  // I should now point past the loaded block
+  EXPECT_EQ(cpu.index_register(), 0x304u);
 }

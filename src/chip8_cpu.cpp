@@ -1,4 +1,5 @@
 #include "chip8_cpu.h"
+#include <algorithm>
 #include <iostream>
 #include <print>
 namespace chip8 {
@@ -154,17 +155,20 @@ void Cpu::execute_8(uint16_t opcode) noexcept {
     v_[x] = temp;
     break;
   case 0x05:
-    v_[0x0F] = v_[x] < v_[y];
-    v_[x] -= v_[y];
+    v_[0x0F] = v_[x] >= v_[y] ? 0x01u : 0x00u;
+    v_[x] = static_cast<uint8_t>(v_[x] - v_[y]);
     break;
   case 0x06:
     v_[0x0F] = v_[x] & 0b00000001u;
     v_[x] >>= 1;
     break;
-  case 0x07:
-    v_[0x0F] = v_[x] > v_[y];
-    v_[y] -= v_[x];
+  case 0x07: {
+    const uint8_t original_vx = v_[x];
+    const uint8_t original_vy = v_[y];
+    v_[0x0F] = original_vy >= original_vx ? 0x01u : 0x00u;
+    v_[x] = static_cast<uint8_t>(original_vy - original_vx);
     break;
+  }
   case 0x0E:
     v_[0x0F] = (v_[x] & 0b10000000u) != 0x00u ? 0x01u : 0x00u;
     v_[x] <<= 1;
@@ -203,7 +207,19 @@ void Cpu::execute_D(uint16_t opcode) noexcept {
   uint8_t y = (opcode & 0x00F0) >> 4;
   uint8_t n = opcode & 0x000F;
 
-  auto sprite = memory_.get().span().subspan(I_, n);
+  auto memory_span = memory_.get().span();
+  if (I_ >= memory_span.size()) {
+    v_[0x0F] = 0;
+    return;
+  }
+
+  const auto available = std::min<std::size_t>(n, memory_span.size() - I_);
+  if (available == 0) {
+    v_[0x0F] = 0;
+    return;
+  }
+
+  auto sprite = memory_span.subspan(I_, available);
   v_[0x0F] = display_.get().draw_sprite(v_[x], v_[y], sprite) ? 1 : 0;
 }
 
@@ -269,12 +285,14 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
     for (uint8_t i = 0; i <= x; ++i) {
       memory_.get().write_byte(I_ + i, v_[i]);
     }
+    I_ = static_cast<uint16_t>(I_ + x + 1);
     break;
   }
   case 0x65: { // Fx65 - LD Vx, [I]
     for (uint8_t i = 0; i <= x; ++i) {
       v_[i] = memory_.get().read_byte(I_ + i);
     }
+    I_ = static_cast<uint16_t>(I_ + x + 1);
     break;
   }
 

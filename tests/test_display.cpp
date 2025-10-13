@@ -22,6 +22,13 @@ TEST(DisplayTest, SetPixelWrapsAround) {
   EXPECT_TRUE(d.is_pixel_set(1, 2)); // wrapped coordinates
 }
 
+TEST(DisplayTest, SetPixelWrapsNegativeCoordinates) {
+  chip8::Display d;
+  d.set_pixel(-1, -1, true);
+  EXPECT_TRUE(
+      d.is_pixel_set(chip8::SCREEN_WIDTH - 1, chip8::SCREEN_HEIGHT - 1));
+}
+
 TEST(DisplayTest, ClearResetsAllPixels) {
   chip8::Display d;
   d.set_pixel(5, 5, true);
