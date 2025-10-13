@@ -4,8 +4,8 @@ project(CHIP8-EMU VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(SDL2 REQUIRED)
-find_package(GTEST REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 
 # --- CHIP8 Core lib ---
 add_library(chip8_core STATIC 

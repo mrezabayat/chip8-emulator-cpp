@@ -25,8 +25,8 @@ jobs:
           - os: windows-latest
             build_type: Release
             configure_preset: conan-default
-            build_preset: conan-default
-            test_preset: conan-default
+            build_preset: conan-release
+            test_preset: conan-release
 
     steps:
       - uses: actions/checkout@v4
@@ -121,11 +121,15 @@ jobs:
 
       - name: Install dependencies with Conan
         run: |
-          conan install . \
-            --build=missing \
-            -s build_type=${{ matrix.build_type }} \
-            -s compiler.cppstd=20 \
+          args=(
+            --build=missing
+            -s build_type=${{ matrix.build_type }}
             --output-folder=build/${{ matrix.build_type }}
+          )
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            args+=(-s compiler.cppstd=20)
+          fi
+          conan install . "${args[@]}"
 
       - name: Configure CMake
         run: cmake --preset ${{ matrix.configure_preset }}
