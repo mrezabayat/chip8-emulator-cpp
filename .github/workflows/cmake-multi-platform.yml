@@ -65,6 +65,7 @@ jobs:
           conan install . \
             --build=missing \
             -s build_type=${{ matrix.build_type }} \
+            -c tools.build:cxxstd=20 \
             --output-folder=build/${{ matrix.build_type }}
 
       - name: Configure CMake
