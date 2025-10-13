@@ -49,7 +49,62 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libegl-dev libegl1-mesa-dev
+          sudo apt-get install -y \
+            libegl-dev \
+            libegl1-mesa-dev \
+            xorg-dev \
+            libglu1-mesa-dev \
+            libdrm-dev \
+            libgbm-dev \
+            libasound2-dev \
+            libpulse-dev \
+            libudev-dev \
+            libdbus-1-dev \
+            libibus-1.0-dev \
+            libx11-xcb-dev \
+            libfontenc-dev \
+            libice-dev \
+            libsm-dev \
+            libxaw7-dev \
+            libxcomposite-dev \
+            libxcursor-dev \
+            libxdamage-dev \
+            libxext-dev \
+            libxfixes-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxkbfile-dev \
+            libxmu-dev \
+            libxmuu-dev \
+            libxpm-dev \
+            libxrandr-dev \
+            libxrender-dev \
+            libxres-dev \
+            libxss-dev \
+            libxt-dev \
+            libxtst-dev \
+            libxv-dev \
+            libxxf86vm-dev \
+            libxcb-glx0-dev \
+            libxcb-render0-dev \
+            libxcb-render-util0-dev \
+            libxcb-xkb-dev \
+            libxcb-icccm4-dev \
+            libxcb-image0-dev \
+            libxcb-keysyms1-dev \
+            libxcb-randr0-dev \
+            libxcb-shape0-dev \
+            libxcb-sync-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinerama0-dev \
+            libxcb-dri3-dev \
+            uuid-dev \
+            libxcb-cursor-dev \
+            libxcb-dri2-0-dev \
+            libxcb-present-dev \
+            libxcb-composite0-dev \
+            libxcb-ewmh-dev \
+            libxcb-res0-dev
 
       - name: Set up MSVC
         if: runner.os == 'Windows'
@@ -65,6 +120,7 @@ jobs:
           conan install . \
             --build=missing \
             -s build_type=${{ matrix.build_type }} \
+            -s compiler.cppstd=20 \
             -c tools.build:cxxstd=20 \
             --output-folder=build/${{ matrix.build_type }}
 
