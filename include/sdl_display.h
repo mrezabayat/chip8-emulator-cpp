@@ -1,7 +1,9 @@
 #pragma once
 #include "SDL2/SDL.h"
+#include "chip8_display.h"
 #include "constants.h"
 #include <array>
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
 
@@ -47,6 +49,39 @@ public:
     window_ = std::move(win);
     renderer_ = std::move(rend);
     texture_ = std::move(tex);
+
+    SDL_SetRenderDrawColor(renderer_.get(), 0, 0, 0, SDL_ALPHA_OPAQUE);
+  }
+
+  void render(const Display &display) {
+    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
+      for (int x = 0; x < SCREEN_WIDTH; ++x) {
+        bool pixel_on = display.is_pixel_set(x, y);
+        pixel_buffer_[y * SCREEN_WIDTH + x] =
+            pixel_on ? 0xFFFFFFFFu : 0xFF000000u;
+      }
+    }
+
+    const int pitch =
+        static_cast<int>(SCREEN_WIDTH) * static_cast<int>(sizeof(uint32_t));
+
+    if (SDL_UpdateTexture(texture_.get(), nullptr, pixel_buffer_.data(),
+                          pitch) != 0) {
+      throw std::runtime_error(SDL_GetError());
+    }
+
+    SDL_Rect dst{0, 0, static_cast<int>(SCREEN_WIDTH) * scale_,
+                 static_cast<int>(SCREEN_HEIGHT) * scale_};
+
+    if (SDL_RenderClear(renderer_.get()) != 0) {
+      throw std::runtime_error(SDL_GetError());
+    }
+
+    if (SDL_RenderCopy(renderer_.get(), texture_.get(), nullptr, &dst) != 0) {
+      throw std::runtime_error(SDL_GetError());
+    }
+
+    SDL_RenderPresent(renderer_.get());
   }
 
 private:

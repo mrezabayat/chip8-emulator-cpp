@@ -17,7 +17,7 @@ target_include_directories(chip8_core PUBLIC include)
 add_executable(chip8 
     src/main.cpp
 )
-target_link_libraries(chip8 PRIVATE chip8_core)
+target_link_libraries(chip8 PRIVATE chip8_core SDL2::SDL2)
 
 # --- Unit tests ---
 enable_testing()

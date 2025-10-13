@@ -8,6 +8,12 @@
 #include "constants.h"
 #include "emulator_types.h"
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <span>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace chip8 {
 
@@ -31,11 +37,53 @@ public:
     Keyboard_ = Keyboard{};
     timers_ = Timer{};
     rng_.reseed(0xC0FFEEu);
+    cpu_.reset();
     state_ = EmulatorState::Stopped;
   }
 
   void set_cycles_per_frame(uint32_t cycles) noexcept {
     cycles_per_frame_ = cycles;
+  }
+
+  void load_rom(std::span<const uint8_t> rom) {
+    if (rom.empty()) {
+      throw std::invalid_argument("ROM data is empty.");
+    }
+
+    if (rom.size() > MEMORY_SIZE - START_ADDRESS) {
+      throw std::runtime_error("ROM size exceeds memory capacity.");
+    }
+
+    reset();
+
+    for (std::size_t i = 0; i < rom.size(); ++i) {
+      auto address =
+          static_cast<uint16_t>(START_ADDRESS + static_cast<uint16_t>(i));
+      memory_.write_byte(address, rom[i]);
+    }
+
+    start();
+  }
+
+  void load_rom(const std::filesystem::path &rom_path) {
+    std::ifstream rom_file(rom_path, std::ios::binary | std::ios::ate);
+    if (!rom_file) {
+      throw std::runtime_error("Failed to open ROM file: " + rom_path.string());
+    }
+
+    const std::streamsize file_size = rom_file.tellg();
+    if (file_size <= 0) {
+      throw std::runtime_error("ROM file is empty: " + rom_path.string());
+    }
+
+    std::vector<uint8_t> buffer(static_cast<std::size_t>(file_size));
+    rom_file.seekg(0, std::ios::beg);
+    if (!rom_file.read(reinterpret_cast<char *>(buffer.data()),
+                       buffer.size())) {
+      throw std::runtime_error("Failed to read ROM file: " + rom_path.string());
+    }
+
+    load_rom(std::span<const uint8_t>(buffer));
   }
 
   // Executes a single frame worth of cycles
@@ -71,7 +119,7 @@ public:
     return display_;
   }
 
-  [[nodiscard]] constexpr Keyboard &Keyboard() noexcept { return Keyboard_; }
+  [[nodiscard]] constexpr Keyboard &keyboard() noexcept { return Keyboard_; }
 
 private:
   Memory memory_;

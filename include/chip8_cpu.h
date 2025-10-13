@@ -12,6 +12,8 @@
 
 namespace chip8 {
 
+class Emulator;
+
 class Cpu {
 public:
   explicit constexpr Cpu(Memory &memory, Display &display, Keyboard &keyboard,
@@ -53,6 +55,8 @@ private:
   void execute_D(uint16_t opcode) noexcept;
   void execute_E(uint16_t opcode) noexcept;
   void execute_F(uint16_t opcode) noexcept;
+
+  friend class Emulator;
 
   std::reference_wrapper<Memory> memory_;
   std::reference_wrapper<Display> display_;

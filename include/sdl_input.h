@@ -8,17 +8,17 @@ namespace chip8 {
 class SdlInput {
 public:
   explicit SdlInput(Keyboard &kb) noexcept : kb_(kb) {
-    keymap_ = {{SDL_SCANCODE_1, 0x0}, {SDL_SCANCODE_2, 0x1},
-               {SDL_SCANCODE_3, 0x2}, {SDL_SCANCODE_4, 0x3},
+    keymap_ = {{SDL_SCANCODE_1, 0x1}, {SDL_SCANCODE_2, 0x2},
+               {SDL_SCANCODE_3, 0x3}, {SDL_SCANCODE_4, 0xC},
 
                {SDL_SCANCODE_Q, 0x4}, {SDL_SCANCODE_W, 0x5},
-               {SDL_SCANCODE_E, 0x6}, {SDL_SCANCODE_R, 0x7},
+               {SDL_SCANCODE_E, 0x6}, {SDL_SCANCODE_R, 0xD},
 
-               {SDL_SCANCODE_A, 0x8}, {SDL_SCANCODE_S, 0x9},
-               {SDL_SCANCODE_D, 0xA}, {SDL_SCANCODE_F, 0xB},
+               {SDL_SCANCODE_A, 0x7}, {SDL_SCANCODE_S, 0x8},
+               {SDL_SCANCODE_D, 0x9}, {SDL_SCANCODE_F, 0xE},
 
-               {SDL_SCANCODE_Z, 0xC}, {SDL_SCANCODE_X, 0xD},
-               {SDL_SCANCODE_C, 0xE}, {SDL_SCANCODE_V, 0xF}};
+               {SDL_SCANCODE_Z, 0xA}, {SDL_SCANCODE_X, 0x0},
+               {SDL_SCANCODE_C, 0xB}, {SDL_SCANCODE_V, 0xF}};
   }
 
   constexpr void handle_event(const SDL_Event &event) const {
