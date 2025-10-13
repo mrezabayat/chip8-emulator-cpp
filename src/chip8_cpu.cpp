@@ -1,7 +1,6 @@
 #include "chip8_cpu.h"
 #include <algorithm>
 #include <iostream>
-#include <print>
 namespace chip8 {
 
 void Cpu::execute() {
@@ -80,7 +79,7 @@ void Cpu::execute_0(uint16_t opcode) noexcept {
     pc_ = stack_[sp_];
     break;
   default:
-    std::print(std::cerr, "[Warning] 0nnn - SYS addr is ignored.\n");
+    std::cerr << "[Warning] 0nnn - SYS addr is ignored." << std::endl;
     break;
   }
 }
