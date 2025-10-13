@@ -45,6 +45,12 @@ jobs:
       - name: Install Conan
         run: python -m pip install --upgrade pip conan
 
+      - name: Install system packages (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl-dev libegl1-mesa-dev
+
       - name: Set up MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1

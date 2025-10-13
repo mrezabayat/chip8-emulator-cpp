@@ -3,35 +3,33 @@ title CHIP-8 Emulator — Core vs Frontend
 
 package "Core (SDL-agnostic)" {
   class Memory {
-    - data_[4096] : uint8_t
-    + reset()
-    + load_rom(span<uint8_t>)
-    + load_rom_file(path)
-    + read_byte(addr) : uint8_t
+    - data_ : array<uint8_t, 4096>
+    + Memory()
     + write_byte(addr, value)
-    + font() : span<const uint8_t>
+    + read_byte(addr) : uint8_t
+    + read_two_bytes(addr) : uint16_t
+    + span() : span<const uint8_t, 4096>
   }
 
   class Display {
-    + FrameBuffer : array<uint8_t>
-    - buffer_
-    - wrap_ : bool
-    - dirty_ : bool
-    + draw_sprite(x, y, sprite) : bool
+    - buffer_ : array<uint8_t, 64*32>
+    + Display()
     + clear()
-    + reset_dirty()
-    + dirty() : bool
+    + set_pixel(x, y, on)
+    + is_pixel_set(x, y) : bool
+    + draw_sprite(x, y, sprite) : bool
   }
 
-  class Keypad {
+  class Keyboard {
     - keys_[16] : bool
     - last_pressed_ : optional<uint8_t>
     + set_key_state(key, pressed)
     + is_pressed(key) : bool
     + last_pressed() : optional<uint8_t>
+    + clear_last_pressed()
   }
 
-  class Timers {
+  class Timer {
     - delay_ : uint8_t
     - sound_ : uint8_t
     + tick_60hz()
@@ -54,53 +52,57 @@ package "Core (SDL-agnostic)" {
   class Cpu {
     - memory_ : Memory&
     - display_ : Display&
-    - keypad_ : Keypad&
-    - timers_ : Timers&
+    - keyboard_ : Keyboard&
+    - timer_ : Timer&
     - rng_ : RandomGenerator&
     - v_[16] : uint8_t
     - stack_[16] : uint16_t
     - i_ : uint16_t
     - pc_ : uint16_t
     - sp_ : uint8_t
-    - config_ : CpuConfig
-    + step() : StepResult
-    + set_config(config)
-    + set_trace_callback(cb)
-    + registers() : const array<uint8_t,16>&
-    + pc() : uint16_t
-    + i() : uint16_t
+    + execute()
+    + program_counter() : uint16_t
+    + registers() : span<const uint8_t,16>
+    + index_register() : uint16_t
+    - reset()
   }
 
   class Emulator {
     - memory_ : Memory
     - display_ : Display
-    - keypad_ : Keypad
-    - timers_ : Timers
+    - keyboard_ : Keyboard
+    - timers_ : Timer
     - rng_ : PcgRandom
     - cpu_ : Cpu
     - state_ : EmulatorState
     - cycles_per_frame_ : uint32_t
+    + Emulator(cycles_per_frame = 10)
     + start()
     + pause()
     + stop()
     + reset()
     + set_cycles_per_frame(value)
+    + load_rom(data)
+    + load_rom(path)
     + run_frame([cycles]) : RunFrameResult
     + tick_timers(ticks)
+    + state() : EmulatorState
+    + display() : const Display&
+    + keyboard() : Keyboard&
   }
 
   ' CPU directly uses core subsystems:
   Cpu --> Memory
   Cpu --> Display
-  Cpu --> Keypad
-  Cpu --> Timers
+  Cpu --> Keyboard
+  Cpu --> Timer
   Cpu --> RandomGenerator
 
   ' Emulator owns the subsystems and CPU:
   Emulator *-- Memory
   Emulator *-- Display
-  Emulator *-- Keypad
-  Emulator *-- Timers
+  Emulator *-- Keyboard
+  Emulator *-- Timer
   Emulator *-- PcgRandom
   Emulator *-- Cpu
 }
@@ -110,31 +112,33 @@ package "Frontend (SDL glue)" {
     - window_ : SDL_Window*
     - renderer_ : SDL_Renderer*
     - texture_ : SDL_Texture*
-    - pixel_buffer_ : vector<uint32_t>
-    + render(display, show_osd, text)
-    + set_scale(scale)
-    + set_vsync(on)
+    - pixel_buffer_ : array<uint32_t, 64*32>
+    - scale_ : int
+    + SdlDisplay(scale = 10)
+    + render(display)
   }
 
   class SdlInput {
-    - keypad_ : Keypad&
+    - kb_ : Keyboard&
     - keymap_ : unordered_map<SDL_Scancode, uint8_t>
+    + SdlInput(keyboard)
     + handle_event(event)
     + set_keymap(map)
   }
 
   class SdlAudio {
     - device_ : SDL_AudioDeviceID
-    - enabled_ : atomic<bool>
-    - playing_ : atomic<bool>
-    + update(beep_active)
-    + set_enabled(value)
+    - obtained_ : SDL_AudioSpec
+    - playing_ : bool
+    + SdlAudio()
+    + ~SdlAudio()
+    + play()
+    + stop()
   }
 
   ' Frontend integrates with Core
   SdlDisplay --> Display
-  SdlInput --> Keypad
-  SdlAudio --> Timers
+  SdlInput --> Keyboard
 }
 
 note right of Emulator
