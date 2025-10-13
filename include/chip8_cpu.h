@@ -16,8 +16,8 @@ class Emulator;
 
 class Cpu {
 public:
-  explicit constexpr Cpu(Memory &memory, Display &display, Keyboard &keyboard,
-                         Timer &timer, RandomGenerator &rng) noexcept
+  explicit Cpu(Memory &memory, Display &display, Keyboard &keyboard,
+               Timer &timer, RandomGenerator &rng) noexcept
       : memory_(memory), display_(display), keyboard_(keyboard), timer_(timer),
         rng_(rng) {
     reset();

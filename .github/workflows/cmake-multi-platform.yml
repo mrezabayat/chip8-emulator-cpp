@@ -20,8 +20,8 @@ jobs:
           - os: ubuntu-latest
             build_type: Release
             configure_preset: conan-release
-            build_preset: conan-default
-            test_preset: conan-default
+            build_preset: conan-release
+            test_preset: conan-release
           - os: windows-latest
             build_type: Release
             configure_preset: conan-default
