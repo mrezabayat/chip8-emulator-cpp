@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED 1
 #include "SDL2/SDL.h"
 #include "chip8_emulator.h"
 #include "sdl_audio.h"

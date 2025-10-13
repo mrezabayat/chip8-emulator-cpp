@@ -124,11 +124,9 @@ jobs:
           args=(
             --build=missing
             -s build_type=${{ matrix.build_type }}
+            -s compiler.cppstd=23
             --output-folder=build/${{ matrix.build_type }}
           )
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            args+=(-s compiler.cppstd=20)
-          fi
           conan install . "${args[@]}"
 
       - name: Configure CMake
