@@ -21,7 +21,7 @@ public:
                {SDL_SCANCODE_C, 0xB}, {SDL_SCANCODE_V, 0xF}};
   }
 
-  constexpr void handle_event(const SDL_Event &event) const {
+  void handle_event(const SDL_Event &event) const {
     if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
       const auto scancode = event.key.keysym.scancode;
       if (keymap_.find(scancode) != keymap_.end()) {
@@ -30,8 +30,7 @@ public:
     }
   }
 
-  constexpr void
-  set_keymap(const std::unordered_map<SDL_Scancode, uint8_t> &keymap) {
+  void set_keymap(const std::unordered_map<SDL_Scancode, uint8_t> &keymap) {
     keymap_ = keymap;
   }
 
