@@ -121,7 +121,6 @@ jobs:
             --build=missing \
             -s build_type=${{ matrix.build_type }} \
             -s compiler.cppstd=20 \
-            -c tools.build:cxxstd=20 \
             --output-folder=build/${{ matrix.build_type }}
 
       - name: Configure CMake
