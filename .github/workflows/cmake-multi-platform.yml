@@ -27,6 +27,11 @@ jobs:
             configure_preset: conan-default
             build_preset: conan-release
             test_preset: conan-release
+          - os: macos-latest
+            build_type: Release
+            configure_preset: conan-release
+            build_preset: conan-release
+            test_preset: conan-release
 
     steps:
       - uses: actions/checkout@v4
