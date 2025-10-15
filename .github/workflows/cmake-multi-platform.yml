@@ -152,3 +152,21 @@ jobs:
       - name: Test (Windows)
         if: runner.os == 'Windows'
         run: ctest --preset ${{ matrix.test_preset }} --output-on-failure --build-config ${{ matrix.build_type }}
+
+      - name: Prepare executable artifact
+        if: success()
+        run: |
+          mkdir -p artifacts
+          binary_dir="build/${{ matrix.build_type }}/build/${{ matrix.build_type }}"
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp "${binary_dir}/chip8.exe" "artifacts/chip8-${{ matrix.os }}-Release.exe"
+          else
+            cp "${binary_dir}/chip8" "artifacts/chip8-${{ matrix.os }}-Release"
+          fi
+
+      - name: Upload executable artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chip8-${{ matrix.os }}-Release
+          path: artifacts/
