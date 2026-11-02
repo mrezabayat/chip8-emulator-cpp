@@ -12,8 +12,8 @@
 ### Build
 
 ```bash
-# Clone
-git clone https://github.com/mrezabayat/chip8-emulator-cpp.git
+# Clone (with the e2e test ROMs submodule)
+git clone --recurse-submodules https://github.com/mrezabayat/chip8-emulator-cpp.git
 cd chip8-emu-cpp
 
 # Install requirements
@@ -30,6 +30,18 @@ conan install . --build=missing
 cmake --preset conan-release
 cmake --build --preset conan-release
 ```
+
+### Test
+
+```bash
+ctest --preset conan-release --output-on-failure
+```
+
+End-to-end tests run [Timendus' chip8-test-suite](https://github.com/Timendus/chip8-test-suite)
+ROMs headlessly and compare the final screen with snapshots in `tests/e2e/golden`.
+If you cloned without submodules, run `git submodule update --init` first.
+To regenerate snapshots after an intended change, run the e2e binary with
+`CHIP8_UPDATE_GOLDEN=1` and review the diff.
 
 ## 🎮 Controls
 

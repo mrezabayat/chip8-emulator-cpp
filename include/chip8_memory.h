@@ -25,6 +25,7 @@ public:
   }
 
   [[nodiscard]] constexpr uint16_t read_two_bytes(uint16_t addr) {
+    check_bounds(addr);
     check_bounds(addr + 1);
     return static_cast<uint16_t>(data_[addr]) << 8 |
            static_cast<uint16_t>(data_[addr + 1]);

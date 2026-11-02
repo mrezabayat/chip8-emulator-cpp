@@ -39,3 +39,7 @@ TEST(MemoryTest, OutOfBoundAccessThrows) {
       std::out_of_range);
   EXPECT_THROW(memory.write_byte(chip8::MEMORY_SIZE, 0xABu), std::out_of_range);
 }
+TEST(MemoryTest, ReadTwoBytesAtLastAddressThrows) {
+  chip8::Memory mem;
+  EXPECT_THROW((void)mem.read_two_bytes(0xFFFF), std::out_of_range);
+}

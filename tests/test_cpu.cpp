@@ -813,3 +813,103 @@ TEST_F(CpuTest, Fx65_LoadsRegistersV0ToVxFromMemoryStartingAtI) {
   // I should now point past the loaded block
   EXPECT_EQ(cpu.index_register(), 0x304u);
 }
+
+TEST_F(CpuTest, ADD_VxVy_FlagWinsWhenVxIsVf) {
+  // Arrange: VF = 0xFF, V1 = 0x01
+  memory.write_byte(0x200, 0x6Fu);
+  memory.write_byte(0x201, 0xFFu);
+  memory.write_byte(0x202, 0x61u);
+  memory.write_byte(0x203, 0x01u);
+  cpu.execute();
+  cpu.execute();
+
+  // Act: VF += V1 (overflows)
+  memory.write_byte(0x204, 0x8Fu);
+  memory.write_byte(0x205, 0x14u);
+  cpu.execute();
+
+  // Assert: VF holds the carry, not the sum
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+}
+
+TEST_F(CpuTest, SUB_VxVy_FlagWinsWhenVxIsVf) {
+  // Arrange: VF = 0x05, V1 = 0x01
+  memory.write_byte(0x200, 0x6Fu);
+  memory.write_byte(0x201, 0x05u);
+  memory.write_byte(0x202, 0x61u);
+  memory.write_byte(0x203, 0x01u);
+  cpu.execute();
+  cpu.execute();
+
+  // Act: VF -= V1 (no borrow)
+  memory.write_byte(0x204, 0x8Fu);
+  memory.write_byte(0x205, 0x15u);
+  cpu.execute();
+
+  // Assert: VF holds the not-borrow flag, not the difference
+  EXPECT_EQ(cpu.registers()[0x0F], 0x01u);
+}
+
+TEST_F(CpuTest, SHL_Vx_FlagWinsWhenVxIsVf) {
+  // Arrange: VF = 0x40
+  memory.write_byte(0x200, 0x6Fu);
+  memory.write_byte(0x201, 0x40u);
+  cpu.execute();
+
+  // Act: VF <<= 1
+  memory.write_byte(0x202, 0x8Fu);
+  memory.write_byte(0x203, 0x0Eu);
+  cpu.execute();
+
+  // Assert: VF holds the shifted-out bit, not 0x80
+  EXPECT_EQ(cpu.registers()[0x0F], 0x00u);
+}
+
+TEST_F(CpuTest, SKP_UsesLowNibbleOfVx) {
+  // Arrange: V2 = 0x1C, key 0xC pressed
+  memory.write_byte(0x200, 0x62u);
+  memory.write_byte(0x201, 0x1Cu);
+  cpu.execute();
+  keyboard.set_key_state(0x0C, true);
+
+  // Act
+  memory.write_byte(0x202, 0xE2u);
+  memory.write_byte(0x203, 0x9Eu);
+  auto before = cpu.program_counter();
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), before + 4);
+}
+
+TEST_F(CpuTest, Fx29_UsesLowNibbleOfVx) {
+  // Arrange: V1 = 0x1A
+  memory.write_byte(0x200, 0x61u);
+  memory.write_byte(0x201, 0x1Au);
+  cpu.execute();
+
+  // Act
+  memory.write_byte(0x202, 0xF1u);
+  memory.write_byte(0x203, 0x29u);
+  cpu.execute();
+
+  // Assert: font for 0xA
+  EXPECT_EQ(cpu.index_register(), 0x32u);
+}
+
+TEST_F(CpuTest, RET_WithEmptyStackThrows) {
+  memory.write_byte(0x200, 0x00u);
+  memory.write_byte(0x201, 0xEEu);
+
+  EXPECT_THROW(cpu.execute(), std::runtime_error);
+}
+
+TEST_F(CpuTest, CALL_WhenStackIsFullThrows) {
+  // CALL 0x200 recursively until the stack is full
+  memory.write_byte(0x200, 0x22u);
+  memory.write_byte(0x201, 0x00u);
+  for (int i = 0; i < chip8::NUM_CPU_STACK; ++i)
+    cpu.execute();
+
+  EXPECT_THROW(cpu.execute(), std::runtime_error);
+}

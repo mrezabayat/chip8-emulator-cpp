@@ -1,6 +1,7 @@
 #include "chip8_cpu.h"
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 namespace chip8 {
 
 void Cpu::execute() {
@@ -69,12 +70,15 @@ void Cpu::reset() noexcept {
   pc_ = START_ADDRESS;
 }
 
-void Cpu::execute_0(uint16_t opcode) noexcept {
+void Cpu::execute_0(uint16_t opcode) {
   switch (opcode) {
   case 0x00E0:
     display_.get().clear();
     break;
   case 0x00EE:
+    if (sp_ == 0) {
+      throw std::runtime_error("Stack underflow");
+    }
     --sp_;
     pc_ = stack_[sp_];
     break;
@@ -86,8 +90,11 @@ void Cpu::execute_0(uint16_t opcode) noexcept {
 
 void Cpu::execute_1(uint16_t opcode) noexcept { pc_ = opcode & 0x0FFF; }
 
-void Cpu::execute_2(uint16_t opcode) noexcept {
+void Cpu::execute_2(uint16_t opcode) {
   uint16_t nnn = opcode & 0x0FFF;
+  if (sp_ >= NUM_CPU_STACK) {
+    throw std::runtime_error("Stack overflow");
+  }
   stack_[sp_] = pc_;
   ++sp_;
   pc_ = nnn;
@@ -148,30 +155,36 @@ void Cpu::execute_8(uint16_t opcode) noexcept {
   case 0x03:
     v_[x] ^= v_[y];
     break;
+  // VF is written after Vx so the flag wins when x == 0xF
   case 0x04:
     temp = v_[x] + v_[y];
+    v_[x] = static_cast<uint8_t>(temp);
     v_[0x0F] = (temp > 0xFFu) ? 0x01u : 0x00u;
-    v_[x] = temp;
     break;
-  case 0x05:
-    v_[0x0F] = v_[x] >= v_[y] ? 0x01u : 0x00u;
+  case 0x05: {
+    const uint8_t flag = v_[x] >= v_[y] ? 0x01u : 0x00u;
     v_[x] = static_cast<uint8_t>(v_[x] - v_[y]);
-    break;
-  case 0x06:
-    v_[0x0F] = v_[x] & 0b00000001u;
-    v_[x] >>= 1;
-    break;
-  case 0x07: {
-    const uint8_t original_vx = v_[x];
-    const uint8_t original_vy = v_[y];
-    v_[0x0F] = original_vy >= original_vx ? 0x01u : 0x00u;
-    v_[x] = static_cast<uint8_t>(original_vy - original_vx);
+    v_[0x0F] = flag;
     break;
   }
-  case 0x0E:
-    v_[0x0F] = (v_[x] & 0b10000000u) != 0x00u ? 0x01u : 0x00u;
-    v_[x] <<= 1;
+  case 0x06: {
+    const uint8_t flag = v_[x] & 0b00000001u;
+    v_[x] >>= 1;
+    v_[0x0F] = flag;
     break;
+  }
+  case 0x07: {
+    const uint8_t flag = v_[y] >= v_[x] ? 0x01u : 0x00u;
+    v_[x] = static_cast<uint8_t>(v_[y] - v_[x]);
+    v_[0x0F] = flag;
+    break;
+  }
+  case 0x0E: {
+    const uint8_t flag = (v_[x] & 0b10000000u) != 0x00u ? 0x01u : 0x00u;
+    v_[x] <<= 1;
+    v_[0x0F] = flag;
+    break;
+  }
   default:
     break;
   }
@@ -228,13 +241,13 @@ void Cpu::execute_E(uint16_t opcode) noexcept {
 
   switch (kk) {
   case 0x9E:
-    if (keyboard_.get().is_pressed(v_[x])) {
+    if (keyboard_.get().is_pressed(v_[x] & 0x0F)) {
       pc_ += 2;
     }
     break;
 
   case 0xA1:
-    if (!keyboard_.get().is_pressed(v_[x])) {
+    if (!keyboard_.get().is_pressed(v_[x] & 0x0F)) {
       pc_ += 2;
     }
     break;
@@ -243,7 +256,7 @@ void Cpu::execute_E(uint16_t opcode) noexcept {
   }
 }
 
-void Cpu::execute_F(uint16_t opcode) noexcept {
+void Cpu::execute_F(uint16_t opcode) {
   uint8_t x = (opcode >> 8) & 0x0F;
   uint8_t kk = opcode & 0x00FF;
 
@@ -271,7 +284,7 @@ void Cpu::execute_F(uint16_t opcode) noexcept {
     I_ += v_[x];
     break;
   case 0x29:
-    I_ = v_[x] * 5;
+    I_ = (v_[x] & 0x0F) * HEIGHT_OF_CHAR;
     break;
   case 0x33: {
     uint8_t value = v_[x];

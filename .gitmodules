@@ -1,0 +1,3 @@
+[submodule "tests/e2e/chip8-test-suite"]
+	path = tests/e2e/chip8-test-suite
+	url = https://github.com/Timendus/chip8-test-suite.git

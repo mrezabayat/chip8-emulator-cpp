@@ -39,9 +39,9 @@ public:
 private:
   void reset() noexcept;
 
-  void execute_0(uint16_t opcode) noexcept;
+  void execute_0(uint16_t opcode);
   void execute_1(uint16_t opcode) noexcept;
-  void execute_2(uint16_t opcode) noexcept;
+  void execute_2(uint16_t opcode);
   void execute_3(uint16_t opcode) noexcept;
   void execute_4(uint16_t opcode) noexcept;
   void execute_5(uint16_t opcode) noexcept;
@@ -54,7 +54,7 @@ private:
   void execute_C(uint16_t opcode) noexcept;
   void execute_D(uint16_t opcode) noexcept;
   void execute_E(uint16_t opcode) noexcept;
-  void execute_F(uint16_t opcode) noexcept;
+  void execute_F(uint16_t opcode);
 
   friend class Emulator;
 

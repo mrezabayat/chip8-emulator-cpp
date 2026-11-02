@@ -35,3 +35,16 @@ target_link_libraries(chip8_tests PRIVATE chip8_core GTest::gtest_main GTest::gm
 
 include(GoogleTest)
 gtest_discover_tests(chip8_tests)
+
+# --- E2E tests (Timendus chip8-test-suite, git submodule) ---
+set(CHIP8_TEST_SUITE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/e2e/chip8-test-suite/bin)
+if(EXISTS ${CHIP8_TEST_SUITE_DIR})
+    add_executable(chip8_e2e_tests tests/e2e/test_roms.cpp)
+    target_link_libraries(chip8_e2e_tests PRIVATE chip8_core GTest::gtest_main)
+    target_compile_definitions(chip8_e2e_tests PRIVATE
+        CHIP8_TEST_SUITE_DIR="${CHIP8_TEST_SUITE_DIR}"
+        CHIP8_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/e2e/golden")
+    gtest_discover_tests(chip8_e2e_tests)
+else()
+    message(WARNING "E2E tests skipped: run 'git submodule update --init'")
+endif()
