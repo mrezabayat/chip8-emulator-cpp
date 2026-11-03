@@ -1,14 +1,8 @@
 # CHIP8 Emulator in C++
 
-> **You're on the `series` branch: the starting point for Episode 2 (Memory)** of *Build a CHIP-8
-> Emulator* on MyCodingDays. It has the build setup, the memory tests and an empty `Memory` class in
-> `include/chip8_memory.h`. Build it and run the tests: all five fail until you build the class.
-> Start your own branch here with `git switch -c my-build ep-02-start`. My solution is the tag
-> `ep-02-done`, and the finished emulator is on `main`.
->
-> **Prefer your own project, or another language?** Go for it: the episode's clues and
-> `tests/test_memory.cpp` show exactly what to build. In C++, keep the same names (`chip8::Memory`,
-> `read_byte`, `write_byte`, `read_two_bytes`) and the tests compile against your code.
+> **You're on the `series` branch, at the end of Episode 2 (Memory)** of *Build a CHIP-8 Emulator* on
+> MyCodingDays: the `Memory` class is built and all five memory tests pass. The episode's starting point
+> is the tag `ep-02-start`, and the finished emulator is on `main`.
 
 ## 🚀 Getting Started
 
