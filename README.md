@@ -66,7 +66,7 @@ A 0 B F        Z X C V
 ## 📹 YouTube Tutorial
 
 This repo is part of a teaching series: *Building a CHIP-8 Emulator with TDD in Modern C++*.
-Follow along on [YouTube](https://youtube.com/yourchannel).
+Follow along on [YouTube](https://www.youtube.com/@MyCodingDays).
 
 ## 📜 License
 
