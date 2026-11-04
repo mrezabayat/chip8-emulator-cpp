@@ -17,6 +17,7 @@ enable_testing()
 
 add_executable(chip8_tests
     tests/test_memory.cpp
+    tests/test_display.cpp
 )
 target_link_libraries(chip8_tests PRIVATE chip8_core GTest::gtest_main GTest::gmock)
 
