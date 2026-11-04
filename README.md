@@ -1,13 +1,8 @@
 # CHIP8 Emulator in C++
 
-> **You're on the `series` branch: the starting point for Episode 3 (The display)** of *Build a CHIP-8
-> Emulator* on MyCodingDays. Memory from Episode 2 is in place. `tests/test_display.cpp` is new, and the
-> `Display` class in `include/chip8_display.h` is empty: its functions throw "Not built yet", so all seven
-> display tests fail until you build it. Start your own branch here with
-> `git switch -c my-build ep-03-start`. My solution is the tag `ep-03-done`, and the finished emulator is on `main`.
->
-> **Building in your own project?** Carry on from where you are: copy `tests/test_display.cpp` and keep the
-> same names (`chip8::Display`, `set_pixel`, `is_pixel_set`, `clear`, `draw_sprite`).
+> **You're on the `series` branch, at the end of Episode 3 (The display)** of *Build a CHIP-8 Emulator* on
+> MyCodingDays: all seven display tests and all five memory tests pass. The episode's starting point is the
+> tag `ep-03-start`, and the finished emulator is on `main`.
 
 ## 🚀 Getting Started
 

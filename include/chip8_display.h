@@ -4,41 +4,61 @@
 #include <array>
 #include <cstdint>
 #include <span>
-#include <stdexcept>
 
 namespace chip8 {
 
-// Episode 3: build this class until every test in tests/test_display.cpp passes.
-//   Step 1: a framebuffer: set_pixel, is_pixel_set, clear, wrapping past the edge
-//           (ScreenStartsCleared, CanSetAndCheckPixel, SetPixelWrapsAround, ClearResetsAllPixels)
-//   Step 2: wrap negative coordinates too (SetPixelWrapsNegativeCoordinates)
-//   Step 3: draw_sprite: XOR each set bit, report collisions
-//           (DrawSpriteWithoutCollision, DrawSpriteWithCollision)
 class Display {
 public:
-  explicit Display() = default;
+  explicit Display() noexcept { clear(); }
 
-  void clear() { throw std::logic_error("Not built yet"); }
+  // Clear screen
+  void clear() noexcept { buffer_.fill(0); }
 
-  void set_pixel(int x, int y, bool on) {
-    (void)x;
-    (void)y;
-    (void)on;
-    throw std::logic_error("Not built yet");
+  // Set or reset pixel at (x,y)
+  constexpr void set_pixel(int x, int y, bool on) noexcept {
+    auto [nx, ny] = wrap(x, y);
+    buffer_[ny * SCREEN_WIDTH + nx] = on ? 1 : 0;
   }
 
-  [[nodiscard]] bool is_pixel_set(int x, int y) const {
-    (void)x;
-    (void)y;
-    throw std::logic_error("Not built yet");
+  // Query pixel state
+  [[nodiscard]] constexpr bool is_pixel_set(int x, int y) const noexcept {
+    auto [nx, ny] = wrap(x, y);
+    return buffer_[ny * SCREEN_WIDTH + nx] != 0;
   }
 
-  [[nodiscard]] bool draw_sprite(int x, int y, std::span<const uint8_t> sprite) {
-    (void)x;
-    (void)y;
-    (void)sprite;
-    throw std::logic_error("Not built yet");
+  // Draw sprite at (x,y), returns true if collision occurred
+  [[nodiscard]] bool draw_sprite(int x, int y,
+                                 std::span<const uint8_t> sprite) noexcept {
+    bool collision = false;
+    for (int row = 0; row < static_cast<int>(sprite.size()); ++row) {
+      uint8_t line = sprite[row];
+      for (int bit = 0; bit < 8; ++bit) {
+        if (line & (0b10000000 >> bit)) {
+          auto [nx, ny] = wrap(x + bit, y + row);
+          auto &pixel = buffer_[ny * SCREEN_WIDTH + nx];
+          if (pixel == 1) {
+            collision = true;
+          }
+          pixel ^= 1; // XOR drawing
+        }
+      }
+    }
+    return collision;
   }
+
+private:
+  // Wrap coordinates (Chip-8 wraps around screen edges)
+  [[nodiscard]] static constexpr int wrap_coord(int value, int max) noexcept {
+    const int mod = value % max;
+    return mod < 0 ? mod + max : mod;
+  }
+
+  [[nodiscard]] static constexpr std::pair<int, int> wrap(int x,
+                                                          int y) noexcept {
+    return {wrap_coord(x, SCREEN_WIDTH), wrap_coord(y, SCREEN_HEIGHT)};
+  }
+
+  std::array<uint8_t, SCREEN_WIDTH * SCREEN_HEIGHT> buffer_;
 };
 
 } // namespace chip8
