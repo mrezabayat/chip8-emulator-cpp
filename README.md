@@ -1,11 +1,8 @@
 # CHIP8 Emulator in C++
 
-> **You're on the `series` branch: the starting point for Episode 4 (Keys, clocks and dice)** of *Build a
-> CHIP-8 Emulator* on MyCodingDays. Memory and the display from Episodes 2 and 3 are in place.
-> `tests/test_keyboard.cpp`, `tests/test_timer.cpp` and `tests/test_pcg_random.cpp` are new, and the
-> `Keyboard`, `Timer` and `PcgRandom` classes are empty: their functions throw "Not built yet", so all eleven
-> new tests fail until you build them. Start your own branch here with
-> `git switch -c my-build ep-04-start`. My solution is the tag `ep-04-done`, and the finished emulator is on `main`.
+> **You're on the `series` branch, at the end of Episode 4 (Keys, clocks and dice)** of *Build a CHIP-8
+> Emulator* on MyCodingDays: the four keyboard, four timer and three random tests pass, and so do the twelve
+> memory and display tests. The episode's starting point is the tag `ep-04-start`, and the finished emulator is on `main`.
 
 ## 🚀 Getting Started
 

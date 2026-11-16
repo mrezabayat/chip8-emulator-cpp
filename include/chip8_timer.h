@@ -1,31 +1,30 @@
 #pragma once
 #include <cstdint>
-#include <stdexcept>
 
 namespace chip8 {
 
-// Episode 4, step 3: build this class until every test in tests/test_timer.cpp passes.
-//   Two bytes, delay and sound. tick_60hz() counts each down by one, never below zero.
-//   beep() is true while the sound timer is above zero.
 class Timer {
 public:
-  explicit Timer() = default;
+  constexpr explicit Timer() noexcept {}
 
-  void set_delay(uint8_t delay) {
-    (void)delay;
-    throw std::logic_error("Not built yet");
+  constexpr void set_delay(uint8_t delay) { delay_ = delay; }
+  constexpr void set_sound(uint8_t sound) { sound_ = sound; }
+
+  constexpr uint8_t delay() const { return delay_; }
+  constexpr uint8_t sound() const { return sound_; }
+
+  constexpr void tick_60hz() {
+    if (delay_ > 0)
+      --delay_;
+    if (sound_ > 0)
+      --sound_;
   }
-  void set_sound(uint8_t sound) {
-    (void)sound;
-    throw std::logic_error("Not built yet");
-  }
 
-  [[nodiscard]] uint8_t delay() const { throw std::logic_error("Not built yet"); }
-  [[nodiscard]] uint8_t sound() const { throw std::logic_error("Not built yet"); }
+  constexpr bool beep() const { return sound_ > 0; }
 
-  void tick_60hz() { throw std::logic_error("Not built yet"); }
-
-  [[nodiscard]] bool beep() const { throw std::logic_error("Not built yet"); }
+private:
+  uint8_t delay_{};
+  uint8_t sound_{};
 };
 
 } // namespace chip8
