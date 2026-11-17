@@ -7,41 +7,53 @@
 #include "constants.h"
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <span>
-#include <stdexcept>
 
 namespace chip8 {
 
-// Episode 5: build this class until every test in tests/test_cpu.cpp passes.
-//   Step 1: the CPU's state (V0-VF, I, PC, SP, the stack), references to the parts it
-//           drives, and reset(): PC starts at START_ADDRESS (StartsAtTheProgramAddress)
-//   Step 2: execute(): fetch two bytes at PC, move PC on, dispatch on the top nibble;
-//           first instruction 1nnn, jump (JPInstructionSetsProgramCounterToNNN)
-//   Step 3: 00E0, clear the screen (CLSInstrcutionClearsScreen)
-//   Step 4: 6xkk, 7xkk and Annn (LDPutsValueKKInRegisterX,
-//           ADD_VxByte_AddsImmediateToRegister, LD_I_SetsValueOfRegisterIToNNN)
 class Cpu {
 public:
   explicit Cpu(Memory &memory, Display &display, Keyboard &keyboard,
-               Timer &timer, RandomGenerator &rng) {
-    (void)memory;
-    (void)display;
-    (void)keyboard;
-    (void)timer;
-    (void)rng;
+               Timer &timer, RandomGenerator &rng) noexcept
+      : memory_(memory), display_(display), keyboard_(keyboard), timer_(timer),
+        rng_(rng) {
+    reset();
   }
 
   void execute();
 
-  [[nodiscard]] uint16_t program_counter() const {
-    throw std::logic_error("Not built yet");
+  [[nodiscard]] constexpr uint16_t program_counter() const noexcept {
+    return pc_;
   }
-  [[nodiscard]] std::span<const uint8_t, NUM_CPU_REGISTERS> registers() const {
-    throw std::logic_error("Not built yet");
+  [[nodiscard]] constexpr std::span<const uint8_t, NUM_CPU_REGISTERS>
+  registers() const noexcept {
+    return v_;
   }
-  [[nodiscard]] uint16_t index_register() const {
-    throw std::logic_error("Not built yet");
+  [[nodiscard]] constexpr uint16_t index_register() const noexcept {
+    return I_;
   }
+
+private:
+  void reset() noexcept;
+
+  void execute_0(uint16_t opcode);
+  void execute_1(uint16_t opcode) noexcept;
+  void execute_6(uint16_t opcode) noexcept;
+  void execute_7(uint16_t opcode) noexcept;
+  void execute_A(uint16_t opcode) noexcept;
+
+  std::reference_wrapper<Memory> memory_;
+  std::reference_wrapper<Display> display_;
+  std::reference_wrapper<Keyboard> keyboard_;
+  std::reference_wrapper<Timer> timer_;
+  std::reference_wrapper<RandomGenerator> rng_;
+
+  std::array<uint16_t, NUM_CPU_STACK> stack_{};
+  std::array<uint8_t, NUM_CPU_REGISTERS> v_{};
+  uint16_t I_{};
+  uint8_t sp_{};
+  uint16_t pc_{};
 };
 
 } // namespace chip8

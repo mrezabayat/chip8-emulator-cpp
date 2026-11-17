@@ -1,11 +1,9 @@
 # CHIP8 Emulator in C++
 
-> **You're on the `series` branch: the starting point for Episode 5 (The CPU heart)** of *Build a CHIP-8
-> Emulator* on MyCodingDays. Memory, the display, the keyboard, the timers and the random generator from Episodes
-> 2-4 are in place. `tests/test_cpu.cpp` is new, and the `Cpu` class in `include/chip8_cpu.h` and
-> `src/chip8_cpu.cpp` is empty: its functions throw "Not built yet", so all six CPU tests fail until you build it.
-> Start your own branch here with `git switch -c my-build ep-05-start`. My solution is the tag `ep-05-done`, and the
-> finished emulator is on `main`.
+> **You're on the `series` branch, at the end of Episode 5 (The CPU heart)** of *Build a CHIP-8 Emulator* on
+> MyCodingDays: the CPU fetches, decodes and executes its first five instructions (00E0, 1nnn, 6xkk, 7xkk, Annn), and all
+> 29 tests pass. The other instruction families arrive in Episodes 6-10. The episode's starting point is the tag
+> `ep-05-start`, and the finished emulator is on `main`.
 
 ## 🚀 Getting Started
 
