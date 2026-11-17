@@ -7,9 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(GTest CONFIG REQUIRED)
 
 # --- CHIP8 Core lib ---
-# Header-only for now; the CPU's source file joins it in episode 5.
-add_library(chip8_core INTERFACE)
-target_include_directories(chip8_core INTERFACE include)
+add_library(chip8_core STATIC
+    src/chip8_cpu.cpp
+)
+target_include_directories(chip8_core PUBLIC include)
 
 # --- Unit tests ---
 # Each episode adds its test file here.
@@ -21,6 +22,7 @@ add_executable(chip8_tests
     tests/test_keyboard.cpp
     tests/test_timer.cpp
     tests/test_pcg_random.cpp
+    tests/test_cpu.cpp
 )
 target_link_libraries(chip8_tests PRIVATE chip8_core GTest::gtest_main GTest::gmock)
 
