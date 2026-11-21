@@ -28,17 +28,42 @@ struct RomCase {
 
 void PrintTo(const RomCase &rom_case, std::ostream *os) { *os << rom_case.name; }
 
-// Your turn (episode 6): one line per screen row, '#' for a lit pixel and '.' for a dark
-// one, and a newline after every row. The golden files in tests/e2e/golden look exactly like that.
 std::string render(const chip8::Display &display) {
-  throw std::runtime_error("Not built yet");
+  std::string out;
+  for (int y = 0; y < chip8::SCREEN_HEIGHT; ++y) {
+    for (int x = 0; x < chip8::SCREEN_WIDTH; ++x)
+      out += display.is_pixel_set(x, y) ? '#' : '.';
+    out += '\n';
+  }
+  return out;
 }
 
-// Your turn (episode 6): build the parts and a Cpu (seed the random generator with 0xC0FFEE),
-// load the ROM file at START_ADDRESS, then run frames x cycles_per_frame instructions,
-// ticking the timer once per frame. Return the screen as render() draws it.
 std::string run_rom(const RomCase &rom_case) {
-  throw std::runtime_error("Not built yet");
+  chip8::Memory memory;
+  chip8::Display display;
+  chip8::Keyboard keyboard;
+  chip8::Timer timer;
+  chip8::PcgRandom rng{0xC0FFEEu};
+  chip8::Cpu cpu{memory, display, keyboard, timer, rng};
+
+  const auto rom_path =
+      std::filesystem::path{CHIP8_TEST_SUITE_DIR} / (rom_case.name + ".ch8");
+  std::ifstream file(rom_path, std::ios::binary);
+  if (!file)
+    throw std::runtime_error("Missing ROM: " + rom_path.string());
+  const std::vector<uint8_t> rom{std::istreambuf_iterator<char>(file), {}};
+
+  for (std::size_t i = 0; i < rom.size(); ++i)
+    memory.write_byte(static_cast<uint16_t>(chip8::START_ADDRESS + i), rom[i]);
+  if (rom_case.platform != 0)
+    memory.write_byte(0x1FF, rom_case.platform);
+
+  for (uint32_t frame = 0; frame < rom_case.frames; ++frame) {
+    for (uint32_t cycle = 0; cycle < rom_case.cycles_per_frame; ++cycle)
+      cpu.execute();
+    timer.tick_60hz();
+  }
+  return render(display);
 }
 
 class RomTest : public ::testing::TestWithParam<RomCase> {};
