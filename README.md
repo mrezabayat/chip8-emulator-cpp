@@ -1,9 +1,12 @@
 # CHIP8 Emulator in C++
 
-> **You're on the `series` branch, at the end of Episode 5 (The CPU heart)** of *Build a CHIP-8 Emulator* on
-> MyCodingDays: the CPU fetches, decodes and executes its first five instructions (00E0, 1nnn, 6xkk, 7xkk, Annn), and all
-> 29 tests pass. The other instruction families arrive in Episodes 6-10. The episode's starting point is the tag
-> `ep-05-start`, and the finished emulator is on `main`.
+> **You're on the `series` branch: the starting point for Episode 6 (First light)** of *Build a CHIP-8 Emulator*
+> on MyCodingDays. Everything from Episodes 2-5 is in place, including the CPU's first five instruction families.
+> New: three `DRW` tests in `tests/test_cpu.cpp`, and `tests/e2e/test_roms.cpp`, which runs real ROMs from Timendus'
+> test suite and compares the screen with `tests/e2e/golden`. The CPU can't draw yet and the test's two helpers,
+> `render` and `run_rom`, throw "Not built yet", so five tests fail until you build them. Start your own branch here
+> with `git switch -c my-build ep-06-start`, then fetch the test ROMs with `git submodule update --init`. My solution
+> is the tag `ep-06-done`, and the finished emulator is on `main`.
 
 ## 🚀 Getting Started
 
