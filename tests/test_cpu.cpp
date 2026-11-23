@@ -44,6 +44,29 @@ TEST_F(CpuTest, CLSInstrcutionClearsScreen) {
   }
 }
 
+TEST_F(CpuTest, RETInstructionReturnsToCaller) {
+  // Arrange: CALL 0x300 pushes the return address, RET pops it
+  // Program layout:
+  // 0x200: 23 00   -> CALL 0x300
+  // 0x300: 00 EE   -> RET
+
+  memory.write_byte(0x200, 0x23);
+  memory.write_byte(0x201, 0x00);
+  memory.write_byte(0x300, 0x00);
+  memory.write_byte(0x301, 0xEE);
+
+  // Step 1: CALL 0x300 should jump there
+  cpu.execute();
+  EXPECT_EQ(cpu.program_counter(), 0x0300u);
+
+  // Step 2: RET should bring us back to next instruction after CALL (0x202)
+  cpu.execute();
+  EXPECT_EQ(cpu.program_counter(), 0x0202u);
+
+  // If we get here without infinite loop or crash, RET worked
+  SUCCEED();
+}
+
 TEST_F(CpuTest, JPInstructionSetsProgramCounterToNNN) {
   memory.write_byte(0x200, 0x12u);
   memory.write_byte(0x201, 0x34u);
@@ -60,6 +83,55 @@ TEST_F(CpuTest, LDPutsValueKKInRegisterX) {
   cpu.execute();
 
   EXPECT_EQ(cpu.registers()[0x05], 0xFAu);
+}
+
+TEST_F(CpuTest, SESkipsNextInstructionIfVxIsKK) {
+  // Set V[B] = 85
+  memory.write_byte(0x200, 0x6Bu);
+  memory.write_byte(0x201, 0x85u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0B], 0x85u);
+  EXPECT_EQ(cpu.program_counter(), 0x202);
+
+  memory.write_byte(0x202, 0x3Bu);
+  memory.write_byte(0x203, 0x85u);
+  cpu.execute();
+  EXPECT_EQ(cpu.program_counter(), 0x206);
+}
+
+TEST_F(CpuTest, SNE_VxByte_SkipsNextInstructionWhenNotEqual) {
+  // Arrange: set v[0x09] = 0x56
+  memory.write_byte(0x200, 0x69u);
+  memory.write_byte(0x201, 0x56u);
+  cpu.execute();
+
+  // Next instruction
+  memory.write_byte(0x202, 0x49u);
+  memory.write_byte(0x203, 0x50u);
+  uint16_t before = cpu.program_counter();
+  cpu.execute(); // should skip
+
+  EXPECT_EQ(cpu.program_counter(), before + 4);
+}
+
+TEST_F(CpuTest, SE_VxVy_SkipsNextInstructionWhenEqual) {
+  // Arrange: set v[0x03] = v[0x0A] = 0x85
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x85u);
+  cpu.execute();
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x85u);
+  cpu.execute();
+
+  // Act
+  memory.write_byte(0x204, 0x53u);
+  memory.write_byte(0x205, 0xA0u);
+  uint16_t before = cpu.program_counter();
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), before + 4);
 }
 
 TEST_F(CpuTest, ADD_VxByte_AddsImmediateToRegister) {
@@ -79,6 +151,28 @@ TEST_F(CpuTest, ADD_VxByte_AddsImmediateToRegister) {
   EXPECT_EQ(cpu.registers()[0x03], first + second);
 }
 
+TEST_F(CpuTest, SNE_VxVy_SkipsNextInstructionIfVxNEVy) {
+  // Arrange: set v[0x03] = 0x64 and v[0x0A] = 0x80
+  memory.write_byte(0x200, 0x63u);
+  memory.write_byte(0x201, 0x64u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x03], 0x64u);
+
+  memory.write_byte(0x202, 0x6Au);
+  memory.write_byte(0x203, 0x80u);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x0A], 0x80u);
+
+  // Act
+  memory.write_byte(0x204, 0x93u);
+  memory.write_byte(0x205, 0xA0u);
+  uint16_t before = cpu.program_counter();
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), before + 4);
+}
+
 TEST_F(CpuTest, LD_I_SetsValueOfRegisterIToNNN) {
   // Arrange
   memory.write_byte(0x200, 0xAF);
@@ -89,6 +183,22 @@ TEST_F(CpuTest, LD_I_SetsValueOfRegisterIToNNN) {
 
   // Assert
   EXPECT_EQ(cpu.index_register(), 0x0FEDu);
+}
+
+TEST_F(CpuTest, JP_V0_JumpsToNNNPlusV0) {
+  // Arrange: set v[0x00] = 0xAB
+  memory.write_byte(0x200, 0x60u);
+  memory.write_byte(0x201, 0xABu);
+  cpu.execute();
+  EXPECT_EQ(cpu.registers()[0x00], 0xABu);
+
+  // Act
+  memory.write_byte(0x202, 0xB8u);
+  memory.write_byte(0x203, 0x79u);
+  cpu.execute();
+
+  // Assert
+  EXPECT_EQ(cpu.program_counter(), 0x00ABu + 0x0879u);
 }
 
 TEST_F(CpuTest, DRW_DrawSpriteWithoutCollision) {
@@ -179,4 +289,21 @@ TEST_F(CpuTest, DRW_DrawSpriteNearEdgeWrapsAround) {
     EXPECT_TRUE(display.is_pixel_set((60 + dx) % 64, 31));
     EXPECT_TRUE(display.is_pixel_set((60 + dx) % 64, 0));
   }
+}
+
+TEST_F(CpuTest, RET_WithEmptyStackThrows) {
+  memory.write_byte(0x200, 0x00u);
+  memory.write_byte(0x201, 0xEEu);
+
+  EXPECT_THROW(cpu.execute(), std::runtime_error);
+}
+
+TEST_F(CpuTest, CALL_WhenStackIsFullThrows) {
+  // CALL 0x200 recursively until the stack is full
+  memory.write_byte(0x200, 0x22u);
+  memory.write_byte(0x201, 0x00u);
+  for (int i = 0; i < chip8::NUM_CPU_STACK; ++i)
+    cpu.execute();
+
+  EXPECT_THROW(cpu.execute(), std::runtime_error);
 }
