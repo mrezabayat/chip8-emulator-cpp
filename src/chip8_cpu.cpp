@@ -33,6 +33,9 @@ void Cpu::execute() {
   case 0x7000:
     execute_7(opcode);
     break;
+  case 0x8000:
+    execute_8(opcode);
+    break;
   case 0x9000:
     execute_9(opcode);
     break;
@@ -46,7 +49,7 @@ void Cpu::execute() {
     execute_D(opcode);
     break;
   default:
-    // The other families arrive in episodes 8 to 10; until then they do nothing.
+    // The other families arrive in episodes 9 and 10; until then they do nothing.
     break;
   }
 }
@@ -123,6 +126,60 @@ void Cpu::execute_7(uint16_t opcode) noexcept {
   uint8_t x = (opcode >> 8) & 0x0F;
   uint8_t kk = opcode & 0x00FF;
   v_[x] += kk;
+}
+
+void Cpu::execute_8(uint16_t opcode) noexcept {
+  uint8_t x = (opcode >> 8) & 0x0F;
+  uint8_t y = (opcode & 0x00F0) >> 4;
+  uint8_t n = opcode & 0x000F;
+  uint16_t temp{};
+
+  switch (n) {
+  case 0x00:
+    v_[x] = v_[y];
+    break;
+  case 0x01:
+    v_[x] |= v_[y];
+    break;
+  case 0x02:
+    v_[x] &= v_[y];
+    break;
+  case 0x03:
+    v_[x] ^= v_[y];
+    break;
+  // VF is written after Vx so the flag wins when x == 0xF
+  case 0x04:
+    temp = v_[x] + v_[y];
+    v_[x] = static_cast<uint8_t>(temp);
+    v_[0x0F] = (temp > 0xFFu) ? 0x01u : 0x00u;
+    break;
+  case 0x05: {
+    const uint8_t flag = v_[x] >= v_[y] ? 0x01u : 0x00u;
+    v_[x] = static_cast<uint8_t>(v_[x] - v_[y]);
+    v_[0x0F] = flag;
+    break;
+  }
+  case 0x06: {
+    const uint8_t flag = v_[x] & 0b00000001u;
+    v_[x] >>= 1;
+    v_[0x0F] = flag;
+    break;
+  }
+  case 0x07: {
+    const uint8_t flag = v_[y] >= v_[x] ? 0x01u : 0x00u;
+    v_[x] = static_cast<uint8_t>(v_[y] - v_[x]);
+    v_[0x0F] = flag;
+    break;
+  }
+  case 0x0E: {
+    const uint8_t flag = (v_[x] & 0b10000000u) != 0x00u ? 0x01u : 0x00u;
+    v_[x] <<= 1;
+    v_[0x0F] = flag;
+    break;
+  }
+  default:
+    break;
+  }
 }
 
 void Cpu::execute_9(uint16_t opcode) noexcept {
